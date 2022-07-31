@@ -10,6 +10,30 @@ import {
   set,
 } from "firebase/database";
 import { getDefaultUserName } from "./helpers/getDefaultUserName";
+import { env } from "./lib/env";
+
+const secret = env.YOUR_SECRET;
+
+const firebaseConfig = {
+  apiKey: env.FIREBASE_KEY,
+  authDomain: env.AUTH_DOMAIN,
+  databaseURL: env.DATABASE_URL,
+  projectId: env.PROJECT_ID,
+  storageBucket: env.STOREAGE_BUCKET,
+  messagingSenderId: env.MESSAGING_ID,
+  appId: env.APP_ID,
+};
+
+// Initialize Firebase
+const app = initializeApp(firebaseConfig);
+const db = getDatabase(app);
+
+let playerId;
+let playerRef;
+let playerData: PlayerData;
+
+const auth = getAuth();
+const allGamesRef = ref(db, "games");
 
 export function initAuth() {
   // Import the functions you need from the SDKs you need
@@ -18,27 +42,6 @@ export function initAuth() {
   // https://firebase.google.com/docs/web/setup#available-libraries
 
   // Your web app's Firebase configuration
-  const firebaseConfig = {
-    apiKey: "AIzaSyDD_9s2aWoEmmdLgIY0jQfS_XS6yfqcc0w",
-    authDomain: "cards-against-agility-89e53.firebaseapp.com",
-    databaseURL:
-      "https://cards-against-agility-89e53-default-rtdb.europe-west1.firebasedatabase.app",
-    projectId: "cards-against-agility-89e53",
-    storageBucket: "cards-against-agility-89e53.appspot.com",
-    messagingSenderId: "792879908472",
-    appId: "1:792879908472:web:f95b4b6c5645d068840f8d",
-  };
-
-  // Initialize Firebase
-  const app = initializeApp(firebaseConfig);
-  const db = getDatabase(app);
-
-  let playerId;
-  let playerRef;
-  let playerData: PlayerData;
-
-  const auth = getAuth();
-  const allGamesRef = ref(db, "games");
 
   function initGame(playerData: PlayerData) {
     const allPlayersRef = ref(db, "players");
