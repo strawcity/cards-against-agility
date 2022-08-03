@@ -1,6 +1,8 @@
-import type { PlayerData } from "src/gameLogic";
+import { getDefaultUserName } from "./../helpers/getDefaultUserName";
 import { writable } from "svelte/store";
 
 export default writable({
-  playerData: {},
+  playerName: getDefaultUserName(),
+  roomId: "",
+  playerId: "",
 });

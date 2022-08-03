@@ -1,21 +1,37 @@
 <script lang="ts">
-  import { createNewGame, initAuth } from "./../gameLogic";
-  import { navigate } from "svelte-routing";
+  import * as Colyseus from "colyseus.js"; // not necessary if included via <script> tag.
+  import session from "./../stores/session";
 
-  let gameId = "";
-  const { joinGame, playerData, playerRef } = initAuth();
-  console.log("🚀 ~ playerRef", playerRef);
-  console.log("🚀 ~ playerDataStore", playerData);
+  var client = new Colyseus.Client("ws://localhost:2567");
+  console.log("🚀 ~ client", client);
 
-  function handleCreateGameClick() {
-    createNewGame("ABC123");
-    navigate(`/room/ABC123`);
+  let roomId;
+
+  if (roomId) {
+    client
+      .reconnect(roomId, $session.playerId)
+      .then((room) => {
+        console.log(room.sessionId, "joined", room.name);
+      })
+      .catch((e) => {
+        console.log("JOIN ERROR", e);
+      });
+  } else {
+    client
+      .joinOrCreate("my_room")
+      .then((room) => {
+        $session.roomId = room.id;
+        roomId = room.id;
+        $session.playerId = room.sessionId;
+
+        console.log(room.sessionId, "joined", room.name);
+      })
+      .catch((e) => {
+        console.log("JOIN ERROR", e);
+      });
   }
 </script>
 
-{playerData}
-
-<button
-  class="mt-5 w-56 py-7 rounded-lg bg-green-100"
-  on:click={() => handleCreateGameClick()}>Create game</button
->
+<h1>Welcome, {$session.playerName}!</h1>
+<h1>Welcome, {$session.playerId}!</h1>
+<a href={`/room/${roomId}`}>Create room</a>

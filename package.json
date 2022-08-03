@@ -24,6 +24,7 @@
     "vite": "^2.9.9"
   },
   "dependencies": {
+    "colyseus.js": "^0.14.13",
     "firebase": "^9.8.3",
     "svelte-routing": "^1.6.0"
   }
