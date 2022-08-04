@@ -10,7 +10,6 @@ export class ConferenceRoom extends Room<ConferenceRoomState> {
     // Called every time this room receives a "move" message
     this.onMessage("playCard", (client, data) => {
       const player = this.state.players.get(client.sessionId);
-      player.answer += data.x;
 
       console.log(client.sessionId + " played " + player.answer);
     });
