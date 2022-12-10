@@ -1,44 +1,93 @@
 <script lang="ts">
-  import * as Colyseus from "colyseus.js"; // not necessary if included via <script> tag.
-  import session from "./../stores/session";
-  import clientStore from "./../stores/colyseusClient";
-  import { getDefaultUserName } from "../helpers/getDefaultUserName";
+  let clientId;
+  let playerTitle;
+  let nickname;
+  let tempNickname;
+  let gameId;
+  let ws = new WebSocket("ws://localhost:9090");
+  ws.onmessage = (message) => {
+    //message.data
+    const response = JSON.parse(message.data);
+    if (response.method === "connect") {
+      clientId = response.clientId;
+      playerTitle = response.playerTitle;
+      console.log("Client id Set successfully " + clientId);
+    }
+    if (response.method === "create") {
+      gameId = response.game.id;
+      console.log(
+        "game successfully created with id " +
+          response.game.id +
+          " with " +
+          response.game.balls +
+          " balls"
+      );
+      if (gameId) {
+        location.href = `/room/${gameId}`;
+      }
+    }
+    if (response.method === "return-nickname") {
+      nickname = response.nickname;
+      console.log("🚀 ~ nickname", nickname);
+    }
+  };
 
-  clientStore.set(new Colyseus.Client("ws://localhost:2567"));
+  function handleSaveNicknamelick() {
+    const payLoad = {
+      method: "save-nickname",
+      clientId: clientId,
+      nickname: tempNickname,
+    };
 
-  let client = $clientStore;
-  let playerData;
+    ws.send(JSON.stringify(payLoad));
+  }
 
-  session.subscribe((value) => {
-    playerData = value;
-    console.log("🚀 ~ session.subscribe ~ playerData", playerData);
-  });
+  function handleNewGameClick() {
+    const payLoad = {
+      method: "create",
+      clientId: clientId,
+      nickname: nickname,
+    };
 
-  // if (roomId) {
-  //   client
-  //     .reconnect(roomId, $session.playerId)
-  //     .then((room) => {
-  //       console.log(room.sessionId, "joined", room.name);
-  //     })
-  //     .catch((e) => {
-  //       console.log("JOIN ERROR", e);
-  //     });
-  // } else {
-  client
-    .joinOrCreate("conference_room")
-    .then((room) => {
-      session.set({
-        playerName: getDefaultUserName(),
-        playerId: room.sessionId,
-        roomId: room.id,
-      });
-    })
-    .catch((e) => {
-      console.log("JOIN ERROR", e);
-    });
-  // }
+    ws.send(JSON.stringify(payLoad));
+  }
+
+  function handleJoinGameClick() {
+    // if (gameId === null) gameId = gameId;
+
+    const payLoad = {
+      method: "join",
+      clientId: clientId,
+      gameId: gameId,
+    };
+
+    ws.send(JSON.stringify(payLoad));
+  }
 </script>
 
-<h1>Welcome, {playerData.playerName}!</h1>
-<h1>Welcome, {playerData.playerId}!</h1>
-<a href={`/room/${playerData.roomId}`}>Create room</a>
+{#if !nickname}
+  <h1>
+    Welcome, {playerTitle}
+    <input class="border border-green-300" bind:value={tempNickname} />!
+  </h1>
+  <button
+    class="border border-emerald-300 rounded-2xl p-3"
+    on:click|once={handleSaveNicknamelick}>Enter nickname</button
+  >
+{:else}
+  <h1>
+    Welcome, {playerTitle}
+    {nickname}!
+  </h1>
+  <button
+    class="border border-emerald-300 rounded-2xl p-3"
+    on:click|once={handleNewGameClick}>New Game</button
+  >
+  <button
+    class="border border-emerald-300 rounded-2xl p-3 mt-5"
+    on:click={handleJoinGameClick}
+    id="btnJoin">Join Game</button
+  >
+  <input class="border border-green-300" bind:value={gameId} />
+  <h1>{gameId}</h1>
+{/if}
