@@ -1,7 +1,6 @@
 <script lang="ts">
   import { websocketStore } from "./../stores/websocket-store";
   import { gameStore } from "./../stores/game-store";
-
   import {
     handleJoinGameClick,
     handleNewGameClick,
@@ -11,11 +10,6 @@
 
   let tempNickname;
   let gameId;
-
-  gameStore.subscribe((state) => {
-    const { clientId, playerTitle, nickname, gameId } = state;
-    console.log(clientId, playerTitle, nickname, gameId);
-  });
 
   function handleSaveNicknamelick() {
     saveNickname(tempNickname);
