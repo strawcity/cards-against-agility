@@ -1,4 +1,4 @@
-[
+export let questions = [
   "This is the way the world ends.Not with a bang but with ----------------------- .",
   "Dear Abby, I'm having some trouble with -----------------------  and would like your advice.",
   "Kids, I don't need drugs to get high on. I'm high on-----------------------,",

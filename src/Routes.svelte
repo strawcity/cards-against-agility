@@ -6,8 +6,8 @@
 
 <Router>
   <Route path="/" component={Lobby} />
-  <Route path="room/" component={Lobby} />
-  <Route path="room/:roomId" let:params>
-    <ActiveGame roomId={params.roomId} />
+  <!-- <Route path="room/" component={Lobby} /> -->
+  <Route path="room/:gameId" let:params>
+    <ActiveGame gameId={params.gameId} />
   </Route>
 </Router>
