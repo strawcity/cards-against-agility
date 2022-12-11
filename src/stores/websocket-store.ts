@@ -9,6 +9,7 @@ const createWebSocketStore = () => {
     websocket = new WebSocket(url);
     websocket.onmessage = (event) => {
       const response = JSON.parse(event.data);
+      console.log("🚀 ~ connect ~ response", response);
       if (response.method === "connect") {
         gameStore.setClientId(response.clientId);
         gameStore.setPlayerTitle(response.playerTitle);
@@ -28,6 +29,10 @@ const createWebSocketStore = () => {
         if (response.game.id) {
           location.href = `/room/${response.game.id}`;
         }
+      }
+      if (response.method === "join") {
+        const game = response.game;
+        console.log("🚀 ~ connect ~ game", game);
       }
     };
   };

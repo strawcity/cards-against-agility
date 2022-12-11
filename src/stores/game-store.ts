@@ -16,19 +16,21 @@ const createGameStore = () => {
   });
 
   const setClientId = (id: string) => {
-    update((state: GameState) => ({ ...state, clientId: id }));
+    set((state: GameState) => {
+      ({ ...state, clientId: id });
+    });
   };
 
   const setPlayerTitle = (title: string) => {
-    update((state: GameState) => ({ ...state, playerTitle: title }));
+    set((state: GameState) => ({ ...state, playerTitle: title }));
   };
 
   const setNickname = (name: string) => {
-    update((state: GameState) => ({ ...state, nickname: name }));
+    set((state: GameState) => ({ ...state, nickname: name }));
   };
 
   const setGameId = (id: string) => {
-    update((state: GameState) => ({ ...state, gameId: id }));
+    set((state: GameState) => ({ ...state, gameId: id }));
   };
 
   return {

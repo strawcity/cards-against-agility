@@ -1,10 +1,14 @@
 <script lang="ts">
   import { saveNickname } from "./../helpers/gameFunctions";
   import { gameStore } from "./../stores/game-store";
+  console.log("🚀 ~ gameStore", $gameStore);
   import { websocketStore } from "./../stores/websocket-store";
   websocketStore.connect("ws://localhost:9090");
 
   export let gameId;
+
+  if (gameId) {
+  }
 
   let tempNickname;
 

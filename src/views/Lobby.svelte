@@ -2,17 +2,31 @@
   import { websocketStore } from "./../stores/websocket-store";
   import { gameStore } from "./../stores/game-store";
   import {
-    handleJoinGameClick,
-    handleNewGameClick,
+    joinGame,
+    createNewGame,
     saveNickname,
   } from "./../helpers/gameFunctions";
-  websocketStore.connect("ws://localhost:9090");
+
+  if ($gameStore.clientId === null) {
+    // Todo: save clientId/game store to local storage and don't make a new client ID connection
+    console.log("🚀 ~ gameStore.clientID", $gameStore.clientId);
+    websocketStore.connect("ws://localhost:9090");
+  }
 
   let tempNickname;
-  let gameId;
+  let tempGameId;
 
   function handleSaveNicknamelick() {
     saveNickname(tempNickname);
+  }
+
+  function handleJoinGameClick() {
+    joinGame(tempGameId);
+  }
+
+  function handleNewGameClick() {
+    console.log("click");
+    createNewGame();
   }
 </script>
 
@@ -39,6 +53,6 @@
     on:click={handleJoinGameClick}
     id="btnJoin">Join Game</button
   >
-  <input class="border border-green-300" bind:value={gameId} />
-  <h1>{gameId}</h1>
+  <input class="border border-green-300" bind:value={tempGameId} />
+  <h1>{tempGameId}</h1>
 {/if}
