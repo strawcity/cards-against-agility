@@ -31,13 +31,13 @@ export function createNewGame() {
 }
 
 export function joinGame(gameId: string) {
-  // if (gameId === null) gameId = gameId;
-
   const payLoad = {
     method: "join",
     clientId: clientId,
+    nicnkame: nicnkame,
     gameId: gameId,
   };
+  console.log("🚀 ~ joinGame ~ payLoad", payLoad);
 
   websocketStore.send(payLoad);
 }
