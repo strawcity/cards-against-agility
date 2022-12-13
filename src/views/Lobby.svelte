@@ -1,15 +1,14 @@
 <script lang="ts">
   import { gameStore } from "./../stores/game-store";
   import { joinGame, createNewGame } from "./../helpers/gameFunctions";
-  import { websocketStore } from "./../stores/websocket-store";
-
-  websocketStore.connect("ws://localhost:9090");
-  websocketStore.subscribe((store) => {
-    const wsStore = store;
-    console.log("🚀 ~ websocketStore.subscribe ~ wsStore", wsStore);
-  });
 
   let tempGameId;
+  let clientId;
+
+  gameStore.subscribe((store) => {
+    const gameStore = store;
+    clientId = gameStore.clientId;
+  });
 
   function handleJoinGameClick() {
     joinGame(tempGameId);
@@ -20,8 +19,7 @@
   }
 </script>
 
-<h1>Lobby Welcome, to Cards Against Agility!</h1>
-{$gameStore.clientId}
+<h1 class="text-green-500">Lobby Welcome, to Cards Against Agility!</h1>
 <button
   class="border border-emerald-300 rounded-2xl p-3"
   on:click|once={handleNewGameClick}>New Game</button

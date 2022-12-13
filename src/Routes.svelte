@@ -6,7 +6,6 @@
 
 <Router>
   <Route path="/" component={Lobby} />
-  <!-- <Route path="room/" component={Lobby} /> -->
   <Route path="/:gameId" let:params>
     <ActiveGame gameId={params.gameId} />
   </Route>

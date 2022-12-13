@@ -1,7 +1,6 @@
 const { answers, questions } = require("./cards/data.cjs");
 const http = require("http");
 const app = require("express")();
-
 const websocketServer = require("websocket").server;
 const httpServer = http.createServer();
 httpServer.listen(9090, () => console.log("Listening.. on 9090"));
@@ -79,6 +78,10 @@ wsServer.on("request", (request) => {
         answerCards: distributeCards(game.answerCards),
         nickname: nickname,
       });
+      console.log(
+        "🚀 ~ connection.on ~ game.answerCards",
+        game.answerCards.length
+      );
 
       //start the game
       // updateGameState();
