@@ -37,7 +37,6 @@ export function joinGame(gameId: string) {
     nicnkame: nicnkame,
     gameId: gameId,
   };
-  console.log("🚀 ~ joinGame ~ payLoad", payLoad);
 
   websocketStore.send(payLoad);
 }

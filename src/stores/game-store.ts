@@ -18,7 +18,7 @@ const createGameStore = () => {
   });
 
   const setClientId = (id: string) => {
-    update((state: GameState) => ({ ...state, clientId: id }));
+    set({ clientId: id });
   };
 
   const setPlayerTitle = (title: string) => {

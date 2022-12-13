@@ -1,8 +1,6 @@
 <script lang="ts">
   import { joinGame, saveNickname } from "./../helpers/gameFunctions";
   import { gameStore } from "./../stores/game-store";
-  import { websocketStore } from "./../stores/websocket-store";
-  websocketStore.connect("ws://localhost:9090");
 
   export let gameId;
   let tempNickname;
@@ -27,6 +25,7 @@
   >
 {:else if !$gameStore.answerCards}
   <h1>{$gameStore.playerTitle}, {$gameStore.nickname}</h1>
+  http://localhost:5173/room/{$gameStore.gameId}
   <button
     class="border border-emerald-300 rounded-2xl p-3 mt-5"
     on:click={handleJoinGameClick}

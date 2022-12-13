@@ -2,7 +2,6 @@ const { answers, questions } = require("./cards/data.cjs");
 const http = require("http");
 const app = require("express")();
 
-app.listen(9091, () => console.log("Listening on http port 9091"));
 const websocketServer = require("websocket").server;
 const httpServer = http.createServer();
 httpServer.listen(9090, () => console.log("Listening.. on 9090"));
@@ -60,6 +59,16 @@ wsServer.on("request", (request) => {
       const nickname = result.nickname;
       const gameId = result.gameId;
       const game = games[gameId];
+
+      if (!gameId || !game) {
+        const payLoad = {
+          method: "invalid-game-id",
+        };
+        const con = clients[clientId].connection;
+        con.send(JSON.stringify(payLoad));
+        return;
+      }
+
       if (game.clients.length >= 6) {
         //sorry max players reach
         return;

@@ -30,11 +30,6 @@ type Client = {
 
 let clientId;
 
-gameStore.subscribe((state) => {
-  const gameState = state;
-  clientId = gameState.clientId;
-});
-
 const createWebSocketStore = () => {
   const { subscribe } = writable(null);
 
@@ -44,7 +39,6 @@ const createWebSocketStore = () => {
       const response = JSON.parse(event.data);
       switch (response.method) {
         case "connect":
-          console.log(response.clientId);
           gameStore.setClientId(response.clientId);
           gameStore.setPlayerTitle(response.playerTitle);
           return;
@@ -55,15 +49,15 @@ const createWebSocketStore = () => {
           gameStore.setGameId(response.game.id);
           console.log(
             "game successfully created with id " +
-              response.game.id +
-              " with " +
-              response.game.answerCards +
-              " balls"
+              response.game.answerCards.length +
+              " cards"
           );
           if (response.game.id) {
-            location.href = `/room/${response.game.id}`;
+            location.href = `/${response.game.id}`;
           }
           return;
+        case "invalid-game-id":
+          alert("Couldn't find that game!");
         case "join":
           const game = response.game;
           let curentClient = game.clients.find((client) => {
@@ -71,6 +65,7 @@ const createWebSocketStore = () => {
           });
 
           gameStore.setAnswerCards(curentClient.answerCards);
+          return;
       }
     };
   };
