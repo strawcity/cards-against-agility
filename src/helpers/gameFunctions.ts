@@ -3,11 +3,13 @@ import { websocketStore } from "./../stores/websocket-store";
 
 let clientId;
 let nicnkame;
+let playerTitle;
 
 gameStore.subscribe((state) => {
   const gameStore = state;
   clientId = gameStore.clientId;
   nicnkame = gameStore.nickname;
+  playerTitle = gameStore.playerTitle;
 });
 
 export function saveNickname(tempNickname) {
@@ -35,6 +37,7 @@ export function joinGame(gameId: string) {
     method: "join",
     clientId: clientId,
     nicnkame: nicnkame,
+    playerTitle: playerTitle,
     gameId: gameId,
   };
 

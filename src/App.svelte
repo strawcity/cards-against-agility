@@ -1,6 +1,6 @@
 <script lang="ts">
   import Routes from "./Routes.svelte";
-  import { gameStore } from "./stores/game-store";
+  import { gameStore, playerList } from "./stores/game-store";
   import { websocketStore } from "./stores/websocket-store";
 
   websocketStore.connect("ws://localhost:9090");
@@ -29,6 +29,13 @@
 
       case "join":
         const game = response.game;
+        function flatMap(arr, callback) {
+          return arr.map(callback).flat();
+        }
+
+        $playerList = flatMap(game.clients, (obj) => {
+          return [`${obj.playerTitle} ${obj.nickname}`];
+        });
         let curentClient = game.clients.find((client) => {
           return client.clientId === $gameStore.clientId;
         });
@@ -42,9 +49,9 @@
   });
 
   // warn before reload
-  window.onbeforeunload = function () {
-    return "Data will be lost if you leave the page, are you sure?";
-  };
+  // window.onbeforeunload = function () {
+  //   return "Data will be lost if you leave the page, are you sure?";
+  // };
 </script>
 
 <main class="flex flex-col w-full h-screen items-center justify-center">

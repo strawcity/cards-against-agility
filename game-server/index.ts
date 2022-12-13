@@ -55,6 +55,54 @@ wsServer.on("request", (request) => {
     //a client want to join
     if (result.method === "join") {
       const clientId = result.clientId;
+      const playerTitle = result.playerTitle;
+      const client = clients[clientId];
+      const gameId = result.gameId;
+      const game = games[gameId];
+
+      if (!gameId || !game) {
+        const payLoad = {
+          method: "invalid-game-id",
+        };
+        const con = clients[clientId].connection;
+        con.send(JSON.stringify(payLoad));
+        return;
+      }
+
+      if (
+        game.clients.length >= 6 ||
+        game.clients.find((client) => {
+          return client.clientId === clientId;
+        })
+      ) {
+        //sorry max players reach
+        return;
+      }
+
+      game.clients.push({
+        clientId: client.clientId,
+        nickname: client.nickname,
+        playerTitle: playerTitle,
+      });
+
+      // //start the game
+      // // updateGameState();
+      // if (game.clients.length >= 2) updateGameState();
+
+      const payLoad = {
+        method: "join",
+        game: game,
+      };
+      //loop through all clients and tell them that people has joined
+      game.clients.forEach((c) => {
+        clients[c.clientId].connection.send(JSON.stringify(payLoad));
+      });
+    }
+
+    //a wants to start the game
+    if (result.method === "start") {
+      const clientId = result.clientId;
+      const client = clients[clientId];
       const nickname = result.nickname;
       const gameId = result.gameId;
       const game = games[gameId];
@@ -74,21 +122,18 @@ wsServer.on("request", (request) => {
       }
 
       game.clients.push({
-        clientId: clientId,
+        clientId: client.clientId,
         answerCards: distributeCards(game.answerCards),
-        nickname: nickname,
+        nickname: client.nickname,
+        playerTitle: client.playerTitle,
       });
-      console.log(
-        "🚀 ~ connection.on ~ game.answerCards",
-        game.answerCards.length
-      );
 
       //start the game
       // updateGameState();
       if (game.clients.length >= 2) updateGameState();
 
       const payLoad = {
-        method: "join",
+        method: "start",
         game: game,
       };
       //loop through all clients and tell them that people has joined

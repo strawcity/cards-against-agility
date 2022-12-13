@@ -13,3 +13,5 @@ export const gameStore = writable<GameStore>({
   nickname: null,
   answerCards: null,
 });
+
+export const playerList = writable([""]);
