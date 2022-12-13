@@ -1,7 +1,4 @@
 /node_modules
-<<<<<<< HEAD
-=======
 /.env
 
->>>>>>> main
-/server/node_modules
+/game-server/node_modules

@@ -24,8 +24,9 @@
   class="border border-emerald-300 rounded-2xl p-3"
   on:click|once={handleNewGameClick}>New Game</button
 >
+<input class="border border-green-300  mt-5" bind:value={tempGameId} />
 <button
-  class="border border-emerald-300 rounded-2xl p-3 mt-5"
+  class="border border-emerald-300 rounded-2xl p-3"
   on:click={handleJoinGameClick}
   id="btnJoin">Join Game</button
 >
