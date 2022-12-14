@@ -11,23 +11,27 @@
     switch (response.method) {
       case "connect":
         $playerStore.playerId = response.playerId;
-        return;
+        break;
 
       case "create-game":
         $gameStore.id = response.game.id;
         $gameStore.players = response.game.players;
         $playerStore.nickname = response.nickname;
-        $playerStore.jobTitle = response.nickname;
         if (response.game.id && response.nickname) {
           navigate(`/${response.game.id}`);
-          // location.href = `/${response.game.id}`;
         }
 
-        return;
+        break;
+      case "join-game":
+        $playerStore.nickname = response.nickname;
+        $gameStore.players = response.game.players;
+        $playerStore.nickname = response.nickname;
+
+        break;
 
       case "invalid-game-id":
         alert("Couldn't find that game!");
-        return;
+        break;
 
       // case "join":
       //   const game = response.game;

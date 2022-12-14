@@ -20,11 +20,11 @@ export function createGame(nickname) {
   websocketStore.send(payLoad);
 }
 
-export function joinGame(gameId: string) {
+export function joinGame(nickname, gameId: string) {
   const payLoad = {
-    method: "join",
+    method: "join-game",
     playerId: playerId,
-    nicnkame: nicnkame,
+    nickname: nickname,
     gameId: gameId,
   };
 

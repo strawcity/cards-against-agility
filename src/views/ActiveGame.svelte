@@ -2,12 +2,15 @@
   import { playerStore, gameStore } from "./../stores/game-store";
   import { fly } from "svelte/transition";
   import classNames from "classnames";
+  import { generateJobTitle, joinGame } from "./../helpers/gameFunctions";
 
   export let gameId;
   let playerId;
   let nickname;
   let showCopiedBanner = false;
   let selectedCard;
+  let jobTitle = generateJobTitle();
+  let tempNickname;
 
   playerStore.subscribe((store) => {
     const playerStore = store;
@@ -15,8 +18,16 @@
     nickname = playerStore.nickname;
   });
 
+  function handleJoinGameClick() {
+    joinGame(tempNickname + " " + jobTitle, gameId);
+  }
+
   function selectCard(card) {
     selectedCard = card;
+  }
+
+  function getNewJobTitle() {
+    jobTitle = generateJobTitle();
   }
 
   function copyToClipboard() {
@@ -40,11 +51,37 @@
 {/if}
 
 <div>
-  {#each $gameStore.players as player}
-    <p>{player.nickname}</p>
-  {/each} is in the lobby!
+  {#if $gameStore.players}
+    {#each $gameStore.players as player}
+      <p>{player.nickname}</p>
+    {/each} is in the lobby!
+
+    <button
+      class="border w-72 border-blue-300 rounded-2xl p-3 mt-5"
+      on:click={copyToClipboard}>Share a link with your friend</button
+    >
+  {/if}
 </div>
 
+{#if !$gameStore.players}
+  <h1 class="text-green-500">Choose a job title and a nickname</h1>
+  <div class="flex flex-col">
+    <input class="border border-green-300 " bind:value={tempNickname} />
+    {jobTitle}
+  </div>
+
+  <button
+    class="border border-blue-300 rounded-2xl p-3"
+    on:click={getNewJobTitle}>Generate new job title</button
+  >
+  <button
+    disabled={!tempNickname}
+    class={classNames("border text-white bg-blue-700 rounded-2xl p-3", {
+      "opacity-30": !tempNickname,
+    })}
+    on:click={handleJoinGameClick}>Save nickname and join lobby</button
+  >
+{/if}
 <!-- {#if !$playerStore.nickname}
   <h1 class="text-orange-500">
     Welcome, {playerTitle}
@@ -68,11 +105,6 @@
   on:click={handleJoinGameClick}
   id="btnJoin">Join Game</button
 > -->
-
-<button
-  class="border w-72 border-blue-300 rounded-2xl p-3 mt-5"
-  on:click={copyToClipboard}>Share a link with your friend</button
->
 
 <div class="flex gap-2">
   {#if $playerStore.answerCards}

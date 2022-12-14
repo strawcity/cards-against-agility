@@ -18,45 +18,66 @@ wsServer.on("request", (request) => {
 
   connection.on("message", (message) => {
     const result = JSON.parse(message.utf8Data);
-    switch (result.method) {
-      case "create-game":
-        // Expects a clientId and a nickname, returns a game and a list of players
-        const playerId = result.playerId;
-        const player = players[playerId];
+    if (result.method === "create-game") {
+      // Expects a clientId and a nickname, returns a game and a list of players
+      const playerId = result.playerId;
+      const player = players[playerId];
 
-        // Save player nickname
-        player.nickname = result.nickname;
+      // Save player nickname
+      player.nickname = result.nickname;
 
-        // get a gameId, create a game
-        const gameId = guid();
-        games[gameId] = {
-          id: gameId,
-          // answerCards: answers,
-          // questionCards: questions,
-          players: [],
-        };
+      // get a gameId, create a game
+      const gameId = guid();
+      games[gameId] = {
+        id: gameId,
+        // answerCards: answers,
+        // questionCards: questions,
+        players: [],
+      };
 
-        // Add player to game
-        const game = games[gameId];
-        game.players.push({
-          playerId: player.playerId,
-          nickname: player.nickname,
-        });
+      // Add player to game
+      const game = games[gameId];
+      game.players.push({
+        playerId: player.playerId,
+        nickname: player.nickname,
+      });
 
-        game.players = flatMap(games[gameId].players, (obj) => {
-          return [{ playerId: obj.playerId, nickname: obj.nickname }];
-        });
+      const payLoad = {
+        method: "create-game",
+        game: games[gameId],
+        nickname: result.nickname,
+      };
 
-        const payLoad = {
-          method: "create-game",
-          game: games[gameId],
-          nickname: result.nickname,
-        };
+      const con = players[playerId].connection;
+      con.send(JSON.stringify(payLoad));
+    }
 
-        const con = players[playerId].connection;
-        con.send(JSON.stringify(payLoad));
+    if (result.method === "join-game") {
+      // Expects a clientId and a nickname, returns a game and a list of players
+      const playerId = result.playerId;
+      const gameId = result.gameId;
+      const player = players[playerId];
 
-        return;
+      // Save player nickname
+      player.nickname = result.nickname;
+      console.log("🚀 ~ connection.on ~ result.nickname", result.nickname);
+
+      // Add player to game
+      const game = games[gameId];
+      game.players.push({
+        playerId: player.playerId,
+        nickname: player.nickname,
+      });
+
+      const payLoad = {
+        method: "join-game",
+        game: games[gameId],
+        nickname: result.nickname,
+      };
+
+      game.players.forEach((player) => {
+        players[player.playerId].connection.send(JSON.stringify(payLoad));
+      });
     }
   });
 
