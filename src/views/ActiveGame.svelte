@@ -1,31 +1,19 @@
 <script lang="ts">
-  import { joinGame, saveNickname } from "./../helpers/gameFunctions";
-  import { gameStore, playerList } from "./../stores/game-store";
+  import { playerStore, gameStore } from "./../stores/game-store";
   import { fly } from "svelte/transition";
   import classNames from "classnames";
 
   export let gameId;
-  let tempNickname;
-  let clientId;
+  let playerId;
   let nickname;
-  let playerTitle;
   let showCopiedBanner = false;
   let selectedCard;
 
-  gameStore.subscribe((store) => {
-    const gameStore = store;
-    clientId = gameStore.clientId;
-    nickname = gameStore.nickname;
-    playerTitle = gameStore.playerTitle;
+  playerStore.subscribe((store) => {
+    const playerStore = store;
+    playerId = playerStore.playerId;
+    nickname = playerStore.nickname;
   });
-
-  function handleSaveNicknamelick() {
-    saveNickname(tempNickname);
-  }
-
-  function handleJoinGameClick() {
-    joinGame(gameId);
-  }
 
   function selectCard(card) {
     selectedCard = card;
@@ -51,51 +39,44 @@
   </div>
 {/if}
 
-{#if $playerList.length > 1}
-  <div>
-    {#each $playerList as player}
-      {#if !player.includes($gameStore.nickname)}
-        <p>{player}</p>
-      {/if}
-    {/each} is in the lobby!
-  </div>
-{/if}
+<div>
+  {#each $gameStore.players as player}
+    <p>{player.nickname}</p>
+  {/each} is in the lobby!
+</div>
 
-{#if !$gameStore.nickname}
+<!-- {#if !$playerStore.nickname}
   <h1 class="text-orange-500">
     Welcome, {playerTitle}
     <input class="border border-green-300" bind:value={tempNickname} />!
   </h1>
-  <button
-    class="border border-blue-300 rounded-2xl p-3"
-    on:click|once={handleSaveNicknamelick}>Enter nickname</button
-  >
 {:else}
   <h1 class="text-orange-500">
     Welcome, {playerTitle}
-    {$gameStore.nickname}
+    {$playerStore.nickname}
   </h1>
-{/if}
-
+{/if} -->
+<!-- 
 <button
-  disabled={!$gameStore.nickname}
+  disabled={!$playerStore.nickname}
   class={classNames(
     "border w-72 bg-blue-800 text-white border-blue-300 rounded-2xl p-3 mt-5",
     {
-      "opacity-30": !$gameStore.nickname,
+      "opacity-30": !$playerStore.nickname,
     }
   )}
   on:click={handleJoinGameClick}
   id="btnJoin">Join Game</button
->
+> -->
+
 <button
   class="border w-72 border-blue-300 rounded-2xl p-3 mt-5"
   on:click={copyToClipboard}>Share a link with your friend</button
 >
 
 <div class="flex gap-2">
-  {#if $gameStore.answerCards}
-    {#each $gameStore.answerCards as card}
+  {#if $playerStore.answerCards}
+    {#each $playerStore.answerCards as card}
       <div
         on:click={() => selectCard(card)}
         class={classNames(

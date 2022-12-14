@@ -1,50 +1,47 @@
 <script lang="ts">
   import Routes from "./Routes.svelte";
-  import { gameStore, playerList } from "./stores/game-store";
+  import { playerStore, gameStore } from "./stores/game-store";
+  import { navigate } from "svelte-routing";
   import { websocketStore } from "./stores/websocket-store";
 
-  websocketStore.connect("ws://localhost:9090");
+  websocketStore.connect("ws://localhost:1999");
   websocketStore.onmessage((message) => {
     const response = JSON.parse(message.data);
 
     switch (response.method) {
       case "connect":
-        $gameStore.clientId = response.clientId;
-        $gameStore.playerTitle = response.playerTitle;
+        $playerStore.playerId = response.playerId;
         return;
 
-      case "return-nickname":
-        $gameStore.nickname = response.nickname;
-        return;
-
-      case "create":
-        if (response.game.id) {
-          location.href = `/${response.game.id}`;
+      case "create-game":
+        $gameStore.id = response.game.id;
+        $gameStore.players = response.game.players;
+        $playerStore.nickname = response.nickname;
+        $playerStore.jobTitle = response.nickname;
+        if (response.game.id && response.nickname) {
+          navigate(`/${response.game.id}`);
+          // location.href = `/${response.game.id}`;
         }
+
         return;
 
       case "invalid-game-id":
         alert("Couldn't find that game!");
         return;
 
-      case "join":
-        const game = response.game;
-        function flatMap(arr, callback) {
-          return arr.map(callback).flat();
-        }
+      // case "join":
+      //   const game = response.game;
 
-        $playerList = flatMap(game.clients, (obj) => {
-          return [`${obj.playerTitle} ${obj.nickname}`];
-        });
-        let curentClient = game.clients.find((client) => {
-          return client.clientId === $gameStore.clientId;
-        });
+      //   $playerList = response.playerList;
+      //   let curentClient = game.clients.find((client) => {
+      //     return client.playerId === $playerStore.playerId;
+      //   });
 
-        if (curentClient.answerCards) {
-          $gameStore.answerCards = curentClient.answerCards;
-        }
+      //   if (curentClient.answerCards) {
+      //     $playerStore.answerCards = curentClient.answerCards;
+      //   }
 
-        return;
+      //   return;
     }
   });
 

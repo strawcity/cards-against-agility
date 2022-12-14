@@ -1,17 +1,23 @@
 import { writable } from "svelte/store";
 
-interface GameStore {
-  clientId: string | null;
-  playerTitle: string | null;
-  nickname: string | null;
-  answerCards: string[] | null;
+interface PlayerStore {
+  playerId: string;
+  nickname: string;
+  answerCards: string[];
 }
 
-export const gameStore = writable<GameStore>({
-  clientId: null,
-  playerTitle: null,
+interface GameStore {
+  id: string;
+  players: any[];
+}
+
+export const playerStore = writable<PlayerStore>({
+  playerId: null,
   nickname: null,
   answerCards: null,
 });
 
-export const playerList = writable([""]);
+export const gameStore = writable<GameStore>({
+  id: null,
+  players: null,
+});

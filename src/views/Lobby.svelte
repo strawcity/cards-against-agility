@@ -1,32 +1,44 @@
 <script lang="ts">
-  import { gameStore } from "./../stores/game-store";
-  import { joinGame, createNewGame } from "./../helpers/gameFunctions";
+  import { playerStore } from "./../stores/game-store";
+  import { createGame, generateJobTitle } from "./../helpers/gameFunctions";
+  import classNames from "classnames";
 
-  let tempGameId;
-  let clientId;
+  let playerId;
+  let tempNickname;
+  let jobTitle = generateJobTitle();
 
-  gameStore.subscribe((store) => {
-    const gameStore = store;
-    clientId = gameStore.clientId;
+  playerStore.subscribe((store) => {
+    const playerStore = store;
+    playerId = playerStore.playerId;
   });
 
-  function handleJoinGameClick() {
-    joinGame(tempGameId);
+  function getNewJobTitle() {
+    jobTitle = generateJobTitle();
   }
 
-  function handleNewGameClick() {
-    createNewGame();
+  function handleSaveNicknamelick() {
+    createGame(tempNickname + " " + jobTitle);
   }
 </script>
 
-<h1 class="text-green-500">Lobby Welcome, to Cards Against Agility!</h1>
-<button
-  class="border border-emerald-300 rounded-2xl p-3"
-  on:click|once={handleNewGameClick}>New Game</button
->
-<!-- <input class="border border-green-300  mt-5" bind:value={tempGameId} />
-<button
-  class="border border-emerald-300 rounded-2xl p-3"
-  on:click={handleJoinGameClick}
-  id="btnJoin">Join Game</button
-> -->
+<div class="flex flex-col gap-5">
+  <h1 class="text-green-500">Lobby Welcome, to Cards Against Agility!</h1>
+  <h1 class="text-green-500">Choose a job title and a nickname</h1>
+  <div class="flex flex-col">
+    <input class="border border-green-300 " bind:value={tempNickname} />
+    {jobTitle}
+  </div>
+
+  <button
+    class="border border-blue-300 rounded-2xl p-3"
+    on:click={getNewJobTitle}>Generate new job title</button
+  >
+  <button
+    disabled={!tempNickname}
+    class={classNames("border text-white bg-blue-700 rounded-2xl p-3", {
+      "opacity-30": !tempNickname,
+    })}
+    on:click|once={handleSaveNicknamelick}
+    >Save nickname and open a lobby</button
+  >
+</div>
