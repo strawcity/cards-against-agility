@@ -2,7 +2,11 @@
   import { playerStore, gameStore } from "./../stores/game-store";
   import { fly } from "svelte/transition";
   import classNames from "classnames";
-  import { generateJobTitle, joinGame } from "./../helpers/gameFunctions";
+  import {
+    generateJobTitle,
+    joinGame,
+    startGame,
+  } from "./../helpers/gameFunctions";
 
   export let gameId;
   let playerId;
@@ -20,6 +24,9 @@
 
   function handleJoinGameClick() {
     joinGame(tempNickname + " " + jobTitle, gameId);
+  }
+  function handleStartGameClick() {
+    startGame(gameId);
   }
 
   function selectCard(card) {
@@ -60,6 +67,12 @@
       class="border w-72 border-blue-300 rounded-2xl p-3 mt-5"
       on:click={copyToClipboard}>Share a link with your friend</button
     >
+    {#if $gameStore.players.length >= 3}
+      <button
+        class="border w-72 bg-blue-700 text-white rounded-2xl p-3 mt-5"
+        on:click|once={handleStartGameClick}>Start game</button
+      >
+    {/if}
   {/if}
 </div>
 
@@ -82,29 +95,6 @@
     on:click={handleJoinGameClick}>Save nickname and join lobby</button
   >
 {/if}
-<!-- {#if !$playerStore.nickname}
-  <h1 class="text-orange-500">
-    Welcome, {playerTitle}
-    <input class="border border-green-300" bind:value={tempNickname} />!
-  </h1>
-{:else}
-  <h1 class="text-orange-500">
-    Welcome, {playerTitle}
-    {$playerStore.nickname}
-  </h1>
-{/if} -->
-<!-- 
-<button
-  disabled={!$playerStore.nickname}
-  class={classNames(
-    "border w-72 bg-blue-800 text-white border-blue-300 rounded-2xl p-3 mt-5",
-    {
-      "opacity-30": !$playerStore.nickname,
-    }
-  )}
-  on:click={handleJoinGameClick}
-  id="btnJoin">Join Game</button
-> -->
 
 <div class="flex gap-2">
   {#if $playerStore.answerCards}
@@ -118,5 +108,6 @@
       >
         <h3>{card}</h3>
       </div>
-    {/each}{/if}
+    {/each}
+  {/if}
 </div>

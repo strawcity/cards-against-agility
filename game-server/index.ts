@@ -19,7 +19,7 @@ wsServer.on("request", (request) => {
   connection.on("message", (message) => {
     const result = JSON.parse(message.utf8Data);
     if (result.method === "create-game") {
-      // Expects a clientId and a nickname, returns a game and a list of players
+      // Expects a playerId and a nickname, returns a game and a list of players
       const playerId = result.playerId;
       const player = players[playerId];
 
@@ -30,8 +30,6 @@ wsServer.on("request", (request) => {
       const gameId = guid();
       games[gameId] = {
         id: gameId,
-        // answerCards: answers,
-        // questionCards: questions,
         players: [],
       };
 
@@ -53,14 +51,13 @@ wsServer.on("request", (request) => {
     }
 
     if (result.method === "join-game") {
-      // Expects a clientId and a nickname, returns a game and a list of players
+      // Expects a playerId and a nickname, returns a game and a list of players
       const playerId = result.playerId;
       const gameId = result.gameId;
       const player = players[playerId];
 
       // Save player nickname
       player.nickname = result.nickname;
-      console.log("🚀 ~ connection.on ~ result.nickname", result.nickname);
 
       // Add player to game
       const game = games[gameId];
@@ -79,6 +76,38 @@ wsServer.on("request", (request) => {
         players[player.playerId].connection.send(JSON.stringify(payLoad));
       });
     }
+
+    if (result.method === "start-game") {
+      const playerId = result.playerId;
+      const gameId = result.gameId;
+      const game = games[gameId];
+
+      game.answerCards = answers;
+      console.log("🚀 ~ connection.on ~ game.answerCards", game.answerCards);
+      game.questionCards = questions;
+
+      if (game.players.length >= 6) {
+        //sorry max players reach
+        return;
+      }
+
+      game.players.forEach((player) => {
+        const payLoad = {
+          method: "start-game",
+          answerCards: distributeCards(game.answerCards),
+        };
+        players[player.playerId].connection.send(JSON.stringify(payLoad));
+      });
+
+      console.log(game.players);
+
+      // game.players.push({
+      //   playerId: player.playerId,
+      //   answerCards: distributeCards(game.answerCards),
+      //   nickname: player.nickname,
+      //   playerTitle: player.playerTitle,
+      // });
+    }
   });
 
   //generate a new playerId
@@ -94,7 +123,7 @@ wsServer.on("request", (request) => {
     method: "connect",
     playerId: playerId,
   };
-  //send back the client connect
+  //send back the player connect
   connection.send(JSON.stringify(payLoad));
 });
 
@@ -117,4 +146,20 @@ const guid = () => {
 
 function flatMap(arr, callback) {
   return arr.map(callback).flat();
+}
+
+function distributeCards(array) {
+  // Check if the array has at least 5 elements
+  if (array.length < 5) {
+    return array;
+  }
+
+  // Create a new arrayay with the first 5 elements of the original arrayay
+  let newArray = array.slice(0, 5);
+
+  // Remove the first 5 elements from the original arrayay
+  array.splice(0, 5);
+
+  // Return the new arrayay
+  return newArray;
 }

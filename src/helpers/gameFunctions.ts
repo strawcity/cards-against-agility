@@ -31,6 +31,15 @@ export function joinGame(nickname, gameId: string) {
   websocketStore.send(payLoad);
 }
 
+export function startGame(gameId: string) {
+  const payLoad = {
+    method: "start-game",
+    gameId: gameId,
+  };
+
+  websocketStore.send(payLoad);
+}
+
 function randomFromArray(array) {
   return array[Math.floor(Math.random() * array.length)];
 }

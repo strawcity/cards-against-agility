@@ -29,6 +29,10 @@
 
         break;
 
+      case "start-game":
+        $playerStore.answerCards = response.answerCards;
+        break;
+
       case "invalid-game-id":
         alert("Couldn't find that game!");
         break;
