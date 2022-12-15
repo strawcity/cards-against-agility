@@ -15,9 +15,11 @@
   let selectedCard;
   let jobTitle = generateJobTitle();
   let tempNickname;
+  const regex = /---/;
 
   playerStore.subscribe((store) => {
     const playerStore = store;
+    console.log("🚀 ~ playerStore.subscribe ~ store", store);
     playerId = playerStore.playerId;
     nickname = playerStore.nickname;
   });
@@ -57,57 +59,73 @@
   </div>
 {/if}
 
-<div>
-  {#if $gameStore.players}
-    {#each $gameStore.players as player}
-      <p>{player.nickname}</p>
-    {/each} is in the lobby!
+{#if $playerStore.answerCards}
+  <div
+    class={classNames(
+      "mb-12 rounded-2xl shrink-0 border transition-all text-white duration-150 bg-blue-700 w-44 h-56 flex justify-center items-center text-center p-5 shadow cursor-pointer"
+    )}
+  >
+    <h3>
+      {@html selectedCard
+        ? $gameStore.questionCard.replace(regex, `<b>${selectedCard}</b>`)
+        : $gameStore.questionCard.replace(regex, "_________")}
+    </h3>
+  </div>
+  {#if !$playerStore.isAskingQuestion}
+    <div class="flex w-full justify-center flex-wrap gap-4  px-5">
+      {#each $playerStore.answerCards as card}
+        <div
+          on:click={() => selectCard(card)}
+          class={classNames(
+            "rounded-2xl shrink-0 border transition-all bg-white duration-150 text-blue-700 border-blue-700 w-40 h-52 flex justify-center items-center text-center p-5 shadow cursor-pointer",
+            {
+              "border-4 scale-125 -translate-y-5 shadow-xl":
+                card === selectedCard,
+            }
+          )}
+        >
+          <h3>{card}</h3>
+        </div>
+      {/each}
+    </div>
+  {/if}
+{:else}
+  <div>
+    {#if $gameStore.players}
+      {#each $gameStore.players as player}
+        <p>{player.nickname}</p>
+      {/each} is in the lobby!
 
-    <button
-      class="border w-72 border-blue-300 rounded-2xl p-3 mt-5"
-      on:click={copyToClipboard}>Share a link with your friend</button
-    >
-    {#if $gameStore.players.length >= 3}
+      <button
+        class="border w-72 border-blue-300 rounded-2xl p-3 mt-5"
+        on:click={copyToClipboard}>Share a link with your friend</button
+      >
+      <!-- {#if $gameStore.players.length >= 3} -->
       <button
         class="border w-72 bg-blue-700 text-white rounded-2xl p-3 mt-5"
         on:click|once={handleStartGameClick}>Start game</button
       >
+      <!-- {/if} -->
     {/if}
-  {/if}
-</div>
-
-{#if !$gameStore.players}
-  <h1 class="text-green-500">Choose a job title and a nickname</h1>
-  <div class="flex flex-col">
-    <input class="border border-green-300 " bind:value={tempNickname} />
-    {jobTitle}
   </div>
 
-  <button
-    class="border border-blue-300 rounded-2xl p-3"
-    on:click={getNewJobTitle}>Generate new job title</button
-  >
-  <button
-    disabled={!tempNickname}
-    class={classNames("border text-white bg-blue-700 rounded-2xl p-3", {
-      "opacity-30": !tempNickname,
-    })}
-    on:click={handleJoinGameClick}>Save nickname and join lobby</button
-  >
-{/if}
+  {#if !$gameStore.players}
+    <h1 class="text-green-500">Choose a job title and a nickname</h1>
+    <div class="flex flex-col">
+      <input class="border border-green-300 " bind:value={tempNickname} />
+      {jobTitle}
+    </div>
 
-<div class="flex gap-2">
-  {#if $playerStore.answerCards}
-    {#each $playerStore.answerCards as card}
-      <div
-        on:click={() => selectCard(card)}
-        class={classNames(
-          "rounded-2xl border transition-all bg-white duration-150 border-blue-700 w-40 h-60 flex justify-center items-center text-center p-4",
-          { "border-4 scale-125 -translate-y-5": card === selectedCard }
-        )}
-      >
-        <h3>{card}</h3>
-      </div>
-    {/each}
+    <button
+      class="border border-blue-300 rounded-2xl p-3"
+      on:click={getNewJobTitle}>Generate new job title</button
+    >
+    <button
+      disabled={!tempNickname}
+      class={classNames("border text-white bg-blue-700 rounded-2xl p-3", {
+        "opacity-30": !tempNickname,
+      })}
+      on:click={handleJoinGameClick}>Save nickname and join lobby</button
+    >
   {/if}
-</div>
+{/if}

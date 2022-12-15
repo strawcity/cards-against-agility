@@ -55,12 +55,18 @@ wsServer.on("request", (request) => {
       const playerId = result.playerId;
       const gameId = result.gameId;
       const player = players[playerId];
+      const game = games[gameId];
+
+      if (game.players.length > 6) {
+        //sorry max players reach
+        return;
+      }
 
       // Save player nickname
       player.nickname = result.nickname;
 
       // Add player to game
-      const game = games[gameId];
+
       game.players.push({
         playerId: player.playerId,
         nickname: player.nickname,
@@ -78,35 +84,31 @@ wsServer.on("request", (request) => {
     }
 
     if (result.method === "start-game") {
-      const playerId = result.playerId;
       const gameId = result.gameId;
       const game = games[gameId];
 
       game.answerCards = answers;
-      console.log("🚀 ~ connection.on ~ game.answerCards", game.answerCards);
       game.questionCards = questions;
 
-      if (game.players.length >= 6) {
-        //sorry max players reach
-        return;
-      }
+      // The initial position is 0 for 'start-game'
+      game.playerRotationPosition = 0;
 
-      game.players.forEach((player) => {
+      // Everyone gets to see the question card
+      game.questionCard = distributeCards(game.questionCards, 1);
+
+      game.players.forEach((player, index) => {
+        // The current asker shouldn't be able to play a card, so they need to know that they are the asker
         const payLoad = {
           method: "start-game",
-          answerCards: distributeCards(game.answerCards),
+          answerCards: distributeCards(game.answerCards, 5),
+          questionCard: game.questionCard,
+          isAskingQuestion: game.playerRotationPosition === index,
         };
+        console.log("🚀 ~ game.players.forEach ~ payLoad", payLoad);
         players[player.playerId].connection.send(JSON.stringify(payLoad));
       });
 
       console.log(game.players);
-
-      // game.players.push({
-      //   playerId: player.playerId,
-      //   answerCards: distributeCards(game.answerCards),
-      //   nickname: player.nickname,
-      //   playerTitle: player.playerTitle,
-      // });
     }
   });
 
@@ -148,18 +150,23 @@ function flatMap(arr, callback) {
   return arr.map(callback).flat();
 }
 
-function distributeCards(array) {
+function distributeCards(array, numberOfCards) {
   // Check if the array has at least 5 elements
-  if (array.length < 5) {
+  if (array.length < numberOfCards) {
     return array;
   }
 
-  // Create a new arrayay with the first 5 elements of the original arrayay
-  let newArray = array.slice(0, 5);
+  // Create a new arrayay with the first numberOfCards elements of the original arrayay
+  let newArray = array.slice(0, numberOfCards);
 
-  // Remove the first 5 elements from the original arrayay
-  array.splice(0, 5);
+  // Remove the first numberOfCards elements from the original arrayay
+  array.splice(0, numberOfCards);
 
   // Return the new arrayay
-  return newArray;
+
+  if (newArray.length > 1) {
+    return newArray;
+  } else {
+    return newArray[0];
+  }
 }

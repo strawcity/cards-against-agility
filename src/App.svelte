@@ -31,6 +31,11 @@
 
       case "start-game":
         $playerStore.answerCards = response.answerCards;
+        $playerStore.answerCards = response.answerCards;
+        $playerStore.isAskingQuestion = response.isAskingQuestion;
+        $gameStore.questionCard = response.questionCard;
+        console.log("🚀 ~ websocketStore.onmessage ~ response", response);
+
         break;
 
       case "invalid-game-id":
