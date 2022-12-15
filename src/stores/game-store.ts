@@ -11,7 +11,13 @@ interface GameStore {
   id: string;
   players: any[];
   questionCard: string;
+  submittedCards: SubmittedCard[];
 }
+
+type SubmittedCard = {
+  playerId: string;
+  card: string;
+};
 
 export const playerStore = writable<PlayerStore>({
   playerId: null,
@@ -24,4 +30,5 @@ export const gameStore = writable<GameStore>({
   id: null,
   players: null,
   questionCard: null,
+  submittedCards: null,
 });

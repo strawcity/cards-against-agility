@@ -1,12 +1,14 @@
 <script lang="ts">
   import { Router, Route } from "svelte-routing";
-  import ActiveGame from "./views/ActiveGame.svelte";
   import Lobby from "./views/Lobby.svelte";
+  import Entrance from "./views/Entrance.svelte";
+  import ActiveGame from "./views/ActiveGame.svelte";
 </script>
 
 <Router>
-  <Route path="/" component={Lobby} />
+  <Route path="/" component={Entrance} />
   <Route path="/:gameId" let:params>
-    <ActiveGame gameId={params.gameId} />
+    <Lobby gameId={params.gameId} />
   </Route>
+  <Route path="/active-game" component={ActiveGame} />
 </Router>

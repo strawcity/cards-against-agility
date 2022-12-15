@@ -25,17 +25,27 @@
       case "join-game":
         $playerStore.nickname = response.nickname;
         $gameStore.players = response.game.players;
+        $gameStore.id = response.game.id;
         $playerStore.nickname = response.nickname;
 
         break;
 
       case "start-game":
         $playerStore.answerCards = response.answerCards;
+
         $playerStore.answerCards = response.answerCards;
         $playerStore.isAskingQuestion = response.isAskingQuestion;
         $gameStore.questionCard = response.questionCard;
-        console.log("🚀 ~ websocketStore.onmessage ~ response", response);
+        if ($playerStore.answerCards) {
+          console.log("🚀 ~ websocketStore.onmessage ~ response", response);
+          navigate("active-game");
+        }
 
+        break;
+
+      case "receive-answer-card":
+        $gameStore.submittedCards = response.submittedCards;
+        console.log("🚀 ~ websocketStore.onmessage ~ response", response);
         break;
 
       case "invalid-game-id":

@@ -31,10 +31,12 @@ wsServer.on("request", (request) => {
       games[gameId] = {
         id: gameId,
         players: [],
+        submittedCards: [],
       };
 
       // Add player to game
       const game = games[gameId];
+      console.log("🚀 ~ connection.on ~ game", game);
       game.players.push({
         playerId: player.playerId,
         nickname: player.nickname,
@@ -92,23 +94,48 @@ wsServer.on("request", (request) => {
 
       // The initial position is 0 for 'start-game'
       game.playerRotationPosition = 0;
+      game.players[game.playerRotationPosition].isAskingQuestion;
 
       // Everyone gets to see the question card
       game.questionCard = distributeCards(game.questionCards, 1);
 
       game.players.forEach((player, index) => {
+        game.players[index].isAskingQuestion =
+          game.playerRotationPosition === index;
         // The current asker shouldn't be able to play a card, so they need to know that they are the asker
         const payLoad = {
           method: "start-game",
           answerCards: distributeCards(game.answerCards, 5),
           questionCard: game.questionCard,
-          isAskingQuestion: game.playerRotationPosition === index,
+          isAskingQuestion: player.isAskingQuestion,
         };
         console.log("🚀 ~ game.players.forEach ~ payLoad", payLoad);
         players[player.playerId].connection.send(JSON.stringify(payLoad));
       });
 
       console.log(game.players);
+    }
+
+    if (result.method === "submit-card") {
+      const submittedCard = result.submittedCard;
+      const playerId = result.playerId;
+      const gameId = result.gameId;
+      const game = games[gameId];
+      // console.log("🚀 ~ connection.on ~ game", game);
+
+      // Adding submittedCard to game's submitted cards
+      game.submittedCards.push({ player: playerId, card: submittedCard });
+
+      game.players.forEach((player) => {
+        // If the person is asking the question, they should get the other cards
+        if (player.isAskingQuestion) {
+          const payLoad = {
+            method: "receive-answer-card",
+            submittedCards: game.submittedCards,
+          };
+          players[player.playerId].connection.send(JSON.stringify(payLoad));
+        }
+      });
     }
   });
 
@@ -117,6 +144,7 @@ wsServer.on("request", (request) => {
   players[playerId] = {
     playerId: playerId,
     nickname: null,
+    isAskingQuestion: false,
     connection: connection,
   };
 

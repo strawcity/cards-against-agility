@@ -1,13 +1,20 @@
-import { playerStore } from "./../stores/game-store";
+import { gameStore, playerStore } from "./../stores/game-store";
 import { websocketStore } from "./../stores/websocket-store";
 
 let playerId;
 let nicnkame;
+let storedGameId;
 
 playerStore.subscribe((state) => {
   const playerStore = state;
   playerId = playerStore.playerId;
   nicnkame = playerStore.nickname;
+});
+
+gameStore.subscribe((state) => {
+  const gameStore = state;
+  console.log("🚀 ~ gameStore.subscribe ~ gameStore", gameStore);
+  storedGameId = gameStore.id;
 });
 
 export function createGame(nickname) {
@@ -36,6 +43,18 @@ export function startGame(gameId: string) {
     method: "start-game",
     gameId: gameId,
   };
+
+  websocketStore.send(payLoad);
+}
+
+export function submitCard(playerId: string, submittedCard: string) {
+  const payLoad = {
+    method: "submit-card",
+    gameId: storedGameId,
+    playerId: playerId,
+    submittedCard: submittedCard,
+  };
+  console.log("🚀 ~ submitCard ~ payLoad", payLoad);
 
   websocketStore.send(payLoad);
 }
