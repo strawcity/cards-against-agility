@@ -134,6 +134,16 @@ wsServer.on("request", (request) => {
             submittedCards: game.submittedCards,
           };
           players[player.playerId].connection.send(JSON.stringify(payLoad));
+
+          // If all cards are submitted, start reviewing
+        }
+        if (game.submittedCards.length === game.players.length - 1) {
+          // If the person is asking the question, they should get the other cards
+
+          const payLoad = {
+            method: "start-card-review",
+          };
+          players[player.playerId].connection.send(JSON.stringify(payLoad));
         }
       });
     }

@@ -37,7 +37,6 @@
         $playerStore.isAskingQuestion = response.isAskingQuestion;
         $gameStore.questionCard = response.questionCard;
         if ($playerStore.answerCards) {
-          console.log("🚀 ~ websocketStore.onmessage ~ response", response);
           navigate("active-game");
         }
 
@@ -45,7 +44,11 @@
 
       case "receive-answer-card":
         $gameStore.submittedCards = response.submittedCards;
-        console.log("🚀 ~ websocketStore.onmessage ~ response", response);
+        break;
+
+      case "start-card-review":
+        console.log("🚀 ~ websocketStore.onmessage ~ start-card-review");
+        $gameStore.isReviewingCards = true;
         break;
 
       case "invalid-game-id":

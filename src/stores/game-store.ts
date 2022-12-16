@@ -9,10 +9,16 @@ interface PlayerStore {
 
 interface GameStore {
   id: string;
-  players: any[];
+  players: Player[];
   questionCard: string;
   submittedCards: SubmittedCard[];
+  isReviewingCards: boolean;
 }
+
+type Player = {
+  playerId: string;
+  nickname: string;
+};
 
 type SubmittedCard = {
   playerId: string;
@@ -31,4 +37,5 @@ export const gameStore = writable<GameStore>({
   players: null,
   questionCard: null,
   submittedCards: null,
+  isReviewingCards: false,
 });

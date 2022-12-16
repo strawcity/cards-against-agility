@@ -6,7 +6,6 @@
     generateJobTitle,
     joinGame,
     startGame,
-    submitCard,
   } from "../helpers/gameFunctions";
 
   export let gameId;
@@ -37,10 +36,6 @@
 
   function getNewJobTitle() {
     jobTitle = generateJobTitle();
-  }
-
-  function handleSubmitCardClick() {
-    submitCard(playerId, selectedCard);
   }
 
   function copyToClipboard() {
@@ -78,8 +73,8 @@
       class="border w-72 bg-blue-700 text-white rounded-2xl p-3 mt-5"
       on:click|once={handleStartGameClick}>Start game</button
     >
-    <!-- {/if} -->
   {/if}
+  <!-- {/if} -->
 </div>
 
 {#if !$gameStore.players}

@@ -2,11 +2,17 @@
   import { playerStore, gameStore } from "../stores/game-store";
   import classNames from "classnames";
   import { submitCard } from "../helpers/gameFunctions";
+  import AskerView from "./../components/AskerView.svelte";
 
   let playerId;
   let nickname;
   let selectedCard;
-  const regex = /---/;
+  let secondSelectedCard;
+  let thirdSelectedCard;
+  let hasSubmittedCard;
+  const oneLineRegex = /---/;
+  const twoLineRegex = /----/;
+  const threeLineRegex = /-----/;
 
   playerStore.subscribe((store) => {
     const playerStore = store;
@@ -20,22 +26,29 @@
 
   function handleSubmitCardClick() {
     submitCard(playerId, selectedCard);
+    hasSubmittedCard = true;
   }
 </script>
 
 <div
   class={classNames(
-    "mb-12 rounded-2xl shrink-0 border transition-all text-white duration-150 bg-blue-700 w-44 h-56 flex justify-center items-center text-center p-5 shadow-md cursor-pointer"
+    "mb-12 rounded-2xl shrink-0 border transition-all text-white duration-150 bg-blue-700 w-44 h-56 flex justify-center items-center text-center p-5 shadow-md"
   )}
 >
   <h3>
     {@html selectedCard
-      ? $gameStore.questionCard.replace(regex, `<b> ${selectedCard}</b>`)
-      : $gameStore.questionCard.replace(regex, " _________")}
+      ? $gameStore.questionCard
+          .replace(oneLineRegex, `<b> ${selectedCard}</b>`)
+          .replace(twoLineRegex, `<b> ${secondSelectedCard}</b>`)
+          .replace(threeLineRegex, `<b> ${thirdSelectedCard}</b>`)
+      : $gameStore.questionCard
+          .replace(oneLineRegex, " _________")
+          .replace(secondSelectedCard, " _________")
+          .replace(thirdSelectedCard, " _________")}
   </h3>
 </div>
 
-{#if !$playerStore.isAskingQuestion}
+{#if !$playerStore.isAskingQuestion && !hasSubmittedCard}
   <div class="flex flex-col items-center">
     <div class="flex w-full justify-center flex-wrap gap-4 px-5">
       {#each $playerStore.answerCards as card}
@@ -58,14 +71,6 @@
       on:click={handleSubmitCardClick}>Submit card</button
     >
   </div>
-{:else if $gameStore.submittedCards}
-  {#each $gameStore.submittedCards as submittedCard}
-    <div
-      class={classNames(
-        "rounded-2xl shrink-0 border transition-all bg-white duration-150 text-blue-700 border-blue-700 w-40 h-52 flex justify-center items-center text-center p-5 shadow cursor-pointer"
-      )}
-    >
-      <h3>{submittedCard.card}</h3>
-    </div>
-  {/each}
+{:else}
+  <AskerView />
 {/if}
