@@ -18,6 +18,7 @@ interface GameStore {
 type Player = {
   playerId: string;
   nickname: string;
+  card?: string;
 };
 
 type SubmittedCard = {
