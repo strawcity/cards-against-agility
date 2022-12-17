@@ -2,13 +2,11 @@ import { gameStore, playerStore } from "./../stores/game-store";
 import { websocketStore } from "./../stores/websocket-store";
 
 let playerId;
-let nicnkame;
 let storedGameId;
 
 playerStore.subscribe((state) => {
   const playerStore = state;
   playerId = playerStore.playerId;
-  nicnkame = playerStore.nickname;
 });
 
 gameStore.subscribe((state) => {
@@ -55,6 +53,20 @@ export function submitCard(playerId: string, submittedCard: string) {
     submittedCard: submittedCard,
   };
   console.log("🚀 ~ submitCard ~ payLoad", payLoad);
+
+  websocketStore.send(payLoad);
+}
+
+export function distributeCurrentAnswerInFocus(
+  answeringPlyaer: string,
+  answerInFocus: string
+) {
+  const payLoad = {
+    method: "show-current-answer",
+    gameId: storedGameId,
+    playerId: answeringPlyaer,
+    answer: answerInFocus,
+  };
 
   websocketStore.send(payLoad);
 }

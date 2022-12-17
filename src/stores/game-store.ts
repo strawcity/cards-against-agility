@@ -15,7 +15,7 @@ interface GameStore {
   isReviewingCards: boolean;
 }
 
-type Player = {
+export type Player = {
   playerId: string;
   nickname: string;
   card?: string;

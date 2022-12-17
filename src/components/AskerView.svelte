@@ -1,6 +1,7 @@
-<script>
-  import { gameStore, playerStore } from "../stores/game-store";
+<script lang="ts">
+  import { gameStore, playerStore, Player } from "../stores/game-store";
   import classNames from "classnames";
+  import { distributeCurrentAnswerInFocus } from "../helpers/gameFunctions";
 
   let cards = $gameStore.players.filter(
     (player) => player.playerId !== $playerStore.playerId
@@ -20,21 +21,27 @@
     }
     return playersArray;
   }
+
+  function handleRevealClick(card: Player) {
+    distributeCurrentAnswerInFocus(card.playerId, card.card);
+  }
 </script>
 
 <div class="flex w-full justify-center flex-wrap gap-4 px-5">
-  {#each cards as cardPlaceHolders}
+  {#each cards as card}
     <div
+      on:click={() =>
+        $gameStore.isReviewingCards ? handleRevealClick(card) : null}
       class={classNames(
         "rounded-2xl shrink-0 border transition-all border-dashed duration-150 w-40 h-52 flex justify-center items-center text-center p-5 shadow",
         {
-          "bg-black text-white  border-none": cardPlaceHolders.card,
-          "text-blue-700 border-blue-700 bg-white opacity-40":
-            !cardPlaceHolders.card,
+          "bg-black text-white  border-none": card.card,
+          "text-blue-700 border-blue-700 bg-white opacity-40": !card.card,
+          "cursor-pointer": $gameStore.isReviewingCards,
         }
       )}
     >
-      {cardPlaceHolders.nickname}'s card
+      {card.nickname}'s card
     </div>
   {/each}
 </div>

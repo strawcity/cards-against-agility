@@ -44,11 +44,15 @@
 
       case "receive-answer-card":
         $gameStore.submittedCards = response.submittedCards;
+
         break;
 
       case "start-card-review":
-        console.log("🚀 ~ websocketStore.onmessage ~ start-card-review");
         $gameStore.isReviewingCards = true;
+        break;
+
+      case "show-answer":
+        console.log("🚀 ~ websocketStore.onmessage ~ response", response);
         break;
 
       case "invalid-game-id":

@@ -147,6 +147,21 @@ wsServer.on("request", (request) => {
         }
       });
     }
+
+    if (result.method === "show-current-answer") {
+      const playerId = result.playerId;
+      const answer = result.answer;
+      const gameId = result.gameId;
+      const game = games[gameId];
+
+      game.players.forEach((player) => {
+        const payLoad = {
+          method: "show-answer",
+          inFocusCard: { player: playerId, answer: answer },
+        };
+        players[player.playerId].connection.send(JSON.stringify(payLoad));
+      });
+    }
   });
 
   //generate a new playerId
