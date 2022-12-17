@@ -5,7 +5,6 @@
   import AskerView from "./../components/AskerView.svelte";
 
   let playerId;
-  let nickname;
   let selectedCard;
   let secondSelectedCard;
   let thirdSelectedCard;
@@ -17,45 +16,62 @@
   playerStore.subscribe((store) => {
     const playerStore = store;
     playerId = playerStore.playerId;
-    nickname = playerStore.nickname;
   });
 
-  function selectCard(card) {
-    selectedCard = card;
+  function selectAnswer(card) {
+    selectedCard = $gameStore.questionCard
+      .replace(oneLineRegex, `<b> ${card}</b>`)
+      .replace(twoLineRegex, `<b> ${secondSelectedCard}</b>`)
+      .replace(threeLineRegex, `<b> ${thirdSelectedCard}</b>`);
   }
 
   function handleSubmitCardClick() {
     submitCard(playerId, selectedCard);
     hasSubmittedCard = true;
   }
+
+  function getPlayerNickname(playerId, players) {
+    for (const player of players) {
+      if (player.playerId === playerId) {
+        return player.nickname;
+      }
+    }
+    return null;
+  }
 </script>
 
+{#if $gameStore.answerInFocus}
+  {getPlayerNickname($gameStore.answerInFocus.player, $gameStore.players)} says:
+{/if}
 <div
   class={classNames(
     "mb-12 rounded-2xl shrink-0 border transition-all text-white duration-150 bg-blue-700 w-44 h-56 flex justify-center items-center text-center p-5 shadow-md"
   )}
 >
   <h3>
-    {@html selectedCard
-      ? $gameStore.questionCard
-          .replace(oneLineRegex, `<b> ${selectedCard}</b>`)
-          .replace(twoLineRegex, `<b> ${secondSelectedCard}</b>`)
-          .replace(threeLineRegex, `<b> ${thirdSelectedCard}</b>`)
-      : $gameStore.questionCard
-          .replace(oneLineRegex, " _________")
-          .replace(twoLineRegex, " _________")
-          .replace(threeLineRegex, " _________")}
+    {#if $gameStore.answerInFocus}
+      {@html $gameStore.answerInFocus.answer}
+    {:else}
+      {@html selectedCard
+        ? selectedCard
+        : $gameStore.questionCard
+            .replace(oneLineRegex, " _________")
+            .replace(twoLineRegex, " _________")
+            .replace(threeLineRegex, " _________")}
+    {/if}
   </h3>
 </div>
 
 {#if !$playerStore.isAskingQuestion}
   {#if hasSubmittedCard}
-    <div class="flex flex-col items-center">Waiting for other players</div>
+    {#if !$gameStore.isReviewingCards}
+      <div class="flex flex-col items-center">Waiting for other players</div>
+    {/if}
   {:else}<div class="flex flex-col items-center">
       <div class="flex w-full justify-center flex-wrap gap-4 px-5">
         {#each $playerStore.answerCards as card}
           <div
-            on:click={() => selectCard(card)}
+            on:click={() => selectAnswer(card)}
             class={classNames(
               "rounded-2xl shrink-0 border transition-all bg-white duration-150 text-blue-700 border-blue-700 w-40 h-52 flex justify-center items-center text-center p-5 shadow cursor-pointer",
               {

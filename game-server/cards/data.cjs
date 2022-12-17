@@ -332,7 +332,7 @@ const questions = [
   "A recent laboratory study shows that undergraduates have 50 % less sex after being exposed to ---",
   "  Why can't I sleep at night? ---",
   // "I never trully understood --- until I encountered ----.",
-  "In a world ravaged by --- our only solace is ----.",
+  // "In a world ravaged by --- our only solace is ----.",
   "Maybe she's born with it. Maybe it's ---",
   "  It's a pitty that kids these days are all getting involved with --- ",
   // "Introducing the amazing Superhero / Sidekick duo! It's ---  and ----",

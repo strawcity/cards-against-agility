@@ -52,6 +52,7 @@
         break;
 
       case "show-answer":
+        $gameStore.answerInFocus = response.inFocusCard;
         console.log("🚀 ~ websocketStore.onmessage ~ response", response);
         break;
 
