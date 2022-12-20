@@ -7,22 +7,14 @@
 
   let hasSubmittedCard;
   let selectedCard;
-  let secondSelectedCard;
-  let thirdSelectedCard;
   let playerId;
-
-  const oneLineRegex = /---/;
-  const twoLineRegex = /----/;
-  const threeLineRegex = /-----/;
 
   playerStore.subscribe((store) => {
     const playerStore = store;
     playerId = playerStore.playerId;
   });
   function selectAnswer(card) {
-    console.log("🚀 ~ selectAnswer ~ card", card);
     selectedCard = replaceLine($gameStore.questionCard, card);
-    console.log("🚀 ~ selectAnswer ~ selectedCard", selectedCard);
   }
   function handleSubmitCardClick() {
     submitCard(playerId, selectedCard);
@@ -30,6 +22,13 @@
   }
 </script>
 
+<!-- If we're in the retro: -->
+{#if $gameStore.answerInFocus && !$gameStore.winner}
+  {getPlayerNickname($gameStore.answerInFocus.player, $gameStore.players)} says:
+{/if}
+{#if $gameStore.winner}
+  {getPlayerNickname($gameStore.winner, $gameStore.players)} won with:
+{/if}
 <div
   class={classNames(
     "mb-12 rounded-2xl shrink-0 border transition-all text-white duration-150 bg-blue-700 w-44 h-56 flex justify-center items-center text-center p-5 shadow-md"
@@ -37,7 +36,6 @@
 >
   <h3>
     {#if $gameStore.answerInFocus}
-      {getPlayerNickname($gameStore.answerInFocus.player, $gameStore.players)} says:
       {@html $gameStore.answerInFocus.answer}
     {:else}
       {@html selectedCard ? selectedCard : replaceLine($gameStore.questionCard)}
@@ -45,11 +43,13 @@
   </h3>
 </div>
 
-{#if hasSubmittedCard}
-  {#if !$gameStore.isReviewingCards}
-    <div class="flex flex-col items-center">Waiting for other players</div>
-  {/if}
-{:else}<div class="flex flex-col items-center">
+{#if hasSubmittedCard && !$gameStore.isReviewingCards}
+  <h3>Waiting for other players</h3>
+{/if}
+
+{#if !hasSubmittedCard}
+  <!-- When you're chosing your card: -->
+  <div class="flex flex-col items-center">
     <div class="flex w-full justify-center flex-wrap gap-4 px-5">
       {#each $playerStore.answerCards as card}
         <button

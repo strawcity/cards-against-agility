@@ -172,7 +172,7 @@ wsServer.on("request", (request) => {
       game.players.forEach((player) => {
         const payLoad = {
           method: "show-winner",
-          inFocusCard: { winningPlayer: playerId },
+          winningPlayer: playerId,
         };
         players[player.playerId].connection.send(JSON.stringify(payLoad));
       });

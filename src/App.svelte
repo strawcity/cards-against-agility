@@ -57,6 +57,11 @@
 
       case "show-winner":
         $gameStore.isReviewingCards = false;
+        $gameStore.winner = response.winningPlayer;
+        break;
+
+      case "next-round":
+        $gameStore.isReviewingCards = false;
         break;
 
       case "invalid-game-id":

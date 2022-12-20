@@ -14,6 +14,7 @@ interface GameStore {
   submittedCards: SubmittedCard[];
   isReviewingCards: boolean;
   answerInFocus: AnswerInFocus;
+  winner: string;
 }
 
 export type Player = {
@@ -45,4 +46,5 @@ export const gameStore = writable<GameStore>({
   submittedCards: null,
   isReviewingCards: false,
   answerInFocus: null,
+  winner: null,
 });

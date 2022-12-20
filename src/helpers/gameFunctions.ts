@@ -58,6 +58,7 @@ export function submitCard(playerId: string, submittedCard: string) {
 }
 
 export function distributeCurrentAnswerInFocus(
+  /* This function takes the current answering-player-in-focus's ID and the completed answer string with <b></b> tags and sends this information to everyone */
   answeringPlyaer: string,
   answerInFocus: string
 ) {
@@ -66,6 +67,16 @@ export function distributeCurrentAnswerInFocus(
     gameId: storedGameId,
     playerId: answeringPlyaer,
     answer: answerInFocus,
+  };
+
+  websocketStore.send(payLoad);
+}
+
+export function selectWinner(winningPlayer) {
+  const payLoad = {
+    method: "select-winner",
+    winningPlayer: winningPlayer,
+    gameId: storedGameId,
   };
 
   websocketStore.send(payLoad);

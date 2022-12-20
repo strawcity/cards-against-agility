@@ -1,8 +1,12 @@
 <script lang="ts">
   import { gameStore, playerStore, Player } from "../stores/game-store";
   import classNames from "classnames";
-  import { distributeCurrentAnswerInFocus } from "../helpers/gameFunctions";
+  import {
+    distributeCurrentAnswerInFocus,
+    selectWinner,
+  } from "../helpers/gameFunctions";
   import { replaceLine } from "./../helpers/replaceLine";
+  import { getPlayerNickname } from "./../helpers/getPlayerNickname";
 
   let players = $gameStore.players.filter(
     (player) => player.playerId !== $playerStore.playerId
@@ -25,6 +29,14 @@
 
   function handleRevealClick(player: Player) {
     distributeCurrentAnswerInFocus(player.playerId, player.card);
+  }
+
+  function handleSelectWinnerClick() {
+    selectWinner($gameStore.answerInFocus.player);
+  }
+
+  function handleNextRoundClick() {
+    console.log("next round");
   }
 </script>
 
@@ -50,7 +62,7 @@
       class={classNames(
         "rounded-2xl shrink-0 border transition-all border-dashed duration-150 w-40 h-52 flex justify-center items-center text-center p-5 shadow",
         {
-          "bg-black text-white  border-none": !!player.card,
+          "bg-black text-white  border-none": player.card,
           "text-blue-700 border-blue-700 bg-white opacity-40": !player.card,
           "cursor-pointer": $gameStore.isReviewingCards,
         }
@@ -60,3 +72,22 @@
     </button>
   {/each}
 </div>
+
+{#if $gameStore.answerInFocus}
+  {#if $gameStore.winner}
+    <button
+      on:click={handleNextRoundClick}
+      class="border border-blue-700 w-72 bg-white text-blue-700 rounded-2xl p-3 mt-5"
+      >Start next round!</button
+    >
+  {:else}
+    <button
+      on:click={handleSelectWinnerClick}
+      class="border border-blue-700 w-72 bg-white text-blue-700 rounded-2xl p-3 mt-5"
+      >Select {getPlayerNickname(
+        $gameStore.answerInFocus.player,
+        $gameStore.players
+      )}'s answer as the winner</button
+    >
+  {/if}
+{/if}
