@@ -162,6 +162,21 @@ wsServer.on("request", (request) => {
         players[player.playerId].connection.send(JSON.stringify(payLoad));
       });
     }
+
+    if (result.method === "select-winner") {
+      const winningPlayer = result.winningPlayer;
+      const gameId = result.gameId;
+      const game = games[gameId];
+
+      players[winningPlayer].wonCards++;
+      game.players.forEach((player) => {
+        const payLoad = {
+          method: "show-winner",
+          inFocusCard: { winningPlayer: playerId },
+        };
+        players[player.playerId].connection.send(JSON.stringify(payLoad));
+      });
+    }
   });
 
   //generate a new playerId
@@ -170,6 +185,7 @@ wsServer.on("request", (request) => {
     playerId: playerId,
     nickname: null,
     isAskingQuestion: false,
+    wonCards: 0,
     connection: connection,
   };
 

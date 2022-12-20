@@ -53,7 +53,10 @@
 
       case "show-answer":
         $gameStore.answerInFocus = response.inFocusCard;
-        console.log("🚀 ~ websocketStore.onmessage ~ response", response);
+        break;
+
+      case "show-winner":
+        $gameStore.isReviewingCards = false;
         break;
 
       case "invalid-game-id":

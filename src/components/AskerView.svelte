@@ -2,13 +2,14 @@
   import { gameStore, playerStore, Player } from "../stores/game-store";
   import classNames from "classnames";
   import { distributeCurrentAnswerInFocus } from "../helpers/gameFunctions";
+  import { replaceLine } from "./../helpers/replaceLine";
 
-  let cards = $gameStore.players.filter(
+  let players = $gameStore.players.filter(
     (player) => player.playerId !== $playerStore.playerId
   );
 
   $: if ($gameStore.submittedCards?.length > 0) {
-    cards = addCard(cards, $gameStore.submittedCards);
+    players = addCard(players, $gameStore.submittedCards);
   }
 
   function addCard(playersArray, cardsArray) {
@@ -22,26 +23,40 @@
     return playersArray;
   }
 
-  function handleRevealClick(card: Player) {
-    distributeCurrentAnswerInFocus(card.playerId, card.card);
+  function handleRevealClick(player: Player) {
+    distributeCurrentAnswerInFocus(player.playerId, player.card);
   }
 </script>
 
+<div
+  class={classNames(
+    "mb-12 rounded-2xl shrink-0 border transition-all text-white duration-150 bg-blue-700 w-44 h-56 flex justify-center items-center text-center p-5 shadow-md"
+  )}
+>
+  <h3>
+    {#if $gameStore.answerInFocus}
+      {@html $gameStore.answerInFocus.answer}
+    {:else}
+      {@html replaceLine($gameStore.questionCard)}
+    {/if}
+  </h3>
+</div>
+
 <div class="flex w-full justify-center flex-wrap gap-4 px-5">
-  {#each cards as card}
-    <div
+  {#each players as player}
+    <button
       on:click={() =>
-        $gameStore.isReviewingCards ? handleRevealClick(card) : null}
+        $gameStore.isReviewingCards ? handleRevealClick(player) : null}
       class={classNames(
         "rounded-2xl shrink-0 border transition-all border-dashed duration-150 w-40 h-52 flex justify-center items-center text-center p-5 shadow",
         {
-          "bg-black text-white  border-none": card.card,
-          "text-blue-700 border-blue-700 bg-white opacity-40": !card.card,
+          "bg-black text-white  border-none": !!player.card,
+          "text-blue-700 border-blue-700 bg-white opacity-40": !player.card,
           "cursor-pointer": $gameStore.isReviewingCards,
         }
       )}
     >
-      {card.nickname}'s card
-    </div>
+      {player.nickname}'s card
+    </button>
   {/each}
 </div>

@@ -1,7 +1,9 @@
 <script lang="ts">
   import classNames from "classnames";
+  import { getPlayerNickname } from "./../helpers/getPlayerNickname";
   import { submitCard } from "../helpers/gameFunctions";
   import { playerStore, gameStore } from "../stores/game-store";
+  import { replaceLine } from "./../helpers/replaceLine";
 
   let hasSubmittedCard;
   let selectedCard;
@@ -18,16 +20,30 @@
     playerId = playerStore.playerId;
   });
   function selectAnswer(card) {
-    selectedCard = $gameStore.questionCard
-      .replace(oneLineRegex, `<b> ${card}</b>`)
-      .replace(twoLineRegex, `<b> ${secondSelectedCard}</b>`)
-      .replace(threeLineRegex, `<b> ${thirdSelectedCard}</b>`);
+    console.log("🚀 ~ selectAnswer ~ card", card);
+    selectedCard = replaceLine($gameStore.questionCard, card);
+    console.log("🚀 ~ selectAnswer ~ selectedCard", selectedCard);
   }
   function handleSubmitCardClick() {
     submitCard(playerId, selectedCard);
     hasSubmittedCard = true;
   }
 </script>
+
+<div
+  class={classNames(
+    "mb-12 rounded-2xl shrink-0 border transition-all text-white duration-150 bg-blue-700 w-44 h-56 flex justify-center items-center text-center p-5 shadow-md"
+  )}
+>
+  <h3>
+    {#if $gameStore.answerInFocus}
+      {getPlayerNickname($gameStore.answerInFocus.player, $gameStore.players)} says:
+      {@html $gameStore.answerInFocus.answer}
+    {:else}
+      {@html selectedCard ? selectedCard : replaceLine($gameStore.questionCard)}
+    {/if}
+  </h3>
+</div>
 
 {#if hasSubmittedCard}
   {#if !$gameStore.isReviewingCards}
@@ -36,7 +52,7 @@
 {:else}<div class="flex flex-col items-center">
     <div class="flex w-full justify-center flex-wrap gap-4 px-5">
       {#each $playerStore.answerCards as card}
-        <div
+        <button
           on:click={() => selectAnswer(card)}
           class={classNames(
             "rounded-2xl shrink-0 border transition-all bg-white duration-150 text-blue-700 border-blue-700 w-40 h-52 flex justify-center items-center text-center p-5 shadow cursor-pointer",
@@ -47,7 +63,7 @@
           )}
         >
           <h3>{card}</h3>
-        </div>
+        </button>
       {/each}
     </div>
     <button
