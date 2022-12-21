@@ -1,17 +1,13 @@
 <script lang="ts">
-  import { playerStore, gameStore } from "../stores/game-store";
-  import classNames from "classnames";
+  import { playerStore } from "../stores/game-store";
   import AskerView from "./../components/AskerView.svelte";
   import PlayingCardView from "./../components/PlayingCardView.svelte";
 
   let playerId;
-  let selectedCard;
-  const oneLineRegex = /---/;
-  const twoLineRegex = /----/;
-  const threeLineRegex = /-----/;
 
   playerStore.subscribe((store) => {
     const playerStore = store;
+    console.log("🚀 ~ playerStore.subscribe ~ playerStore", playerStore);
     playerId = playerStore.playerId;
   });
 </script>

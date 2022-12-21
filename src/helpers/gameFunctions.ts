@@ -11,7 +11,6 @@ playerStore.subscribe((state) => {
 
 gameStore.subscribe((state) => {
   const gameStore = state;
-  console.log("🚀 ~ gameStore.subscribe ~ gameStore", gameStore);
   storedGameId = gameStore.id;
 });
 
@@ -52,7 +51,6 @@ export function submitCard(playerId: string, submittedCard: string) {
     playerId: playerId,
     submittedCard: submittedCard,
   };
-  console.log("🚀 ~ submitCard ~ payLoad", payLoad);
 
   websocketStore.send(payLoad);
 }

@@ -67,20 +67,6 @@
       case "invalid-game-id":
         alert("Couldn't find that game!");
         break;
-
-      // case "join":
-      //   const game = response.game;
-
-      //   $playerList = response.playerList;
-      //   let curentClient = game.clients.find((client) => {
-      //     return client.playerId === $playerStore.playerId;
-      //   });
-
-      //   if (curentClient.answerCards) {
-      //     $playerStore.answerCards = curentClient.answerCards;
-      //   }
-
-      //   return;
     }
   });
 
