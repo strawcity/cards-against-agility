@@ -1,193 +1,202 @@
 const { answers, questions } = require("./cards/data.cjs");
 const http = require("http");
-const app = require("express")();
 const websocketServer = require("websocket").server;
 const httpServer = http.createServer();
-httpServer.listen(9090, () => console.log("Listening.. on 9090"));
+httpServer.listen(1999, () => console.log("Listening.. on 1999"));
 
-const clients = {};
+const players = {};
 const games = {};
 
 const wsServer = new websocketServer({
   httpServer: httpServer,
 });
+
 wsServer.on("request", (request) => {
-  //connect
   const connection = request.accept(null, request.origin);
   connection.on("open", () => console.log("opened!"));
   connection.on("close", () => console.log("closed!"));
+
   connection.on("message", (message) => {
     const result = JSON.parse(message.utf8Data);
-    //I have received a message from the client
-    //a user want to create a new game
-    if (result.method === "create") {
-      const clientId = result.clientId;
+    if (result.method === "create-game") {
+      // Expects a playerId and a nickname, returns a game and a list of players
+      const playerId = result.playerId;
+      const player = players[playerId];
+
+      // Save player nickname
+      player.nickname = result.nickname;
+
+      // get a gameId, create a game
       const gameId = guid();
       games[gameId] = {
         id: gameId,
-        answerCards: answers,
-        questionCards: questions,
-        clients: [],
+        players: [],
+        submittedCards: [],
       };
 
+      // Add player to game
+      const game = games[gameId];
+      console.log("🚀 ~ connection.on ~ game", game);
+      game.players.push({
+        playerId: player.playerId,
+        nickname: player.nickname,
+      });
+
       const payLoad = {
-        method: "create",
+        method: "create-game",
         game: games[gameId],
-      };
-
-      const con = clients[clientId].connection;
-      con.send(JSON.stringify(payLoad));
-    }
-
-    if (result.method === "save-nickname") {
-      const clientId = result.clientId;
-      clients[clientId].nickname = result.nickname;
-
-      const payLoad = {
-        method: "return-nickname",
         nickname: result.nickname,
       };
 
-      const con = clients[clientId].connection;
+      const con = players[playerId].connection;
       con.send(JSON.stringify(payLoad));
     }
 
-    //a client want to join
-    if (result.method === "join") {
-      const clientId = result.clientId;
-      const playerTitle = result.playerTitle;
-      const client = clients[clientId];
+    if (result.method === "join-game") {
+      // Expects a playerId and a nickname, returns a game and a list of players
+      const playerId = result.playerId;
       const gameId = result.gameId;
+      const player = players[playerId];
       const game = games[gameId];
 
-      if (!gameId || !game) {
-        const payLoad = {
-          method: "invalid-game-id",
-        };
-        const con = clients[clientId].connection;
-        con.send(JSON.stringify(payLoad));
-        return;
-      }
-
-      if (
-        game.clients.length >= 6 ||
-        game.clients.find((client) => {
-          return client.clientId === clientId;
-        })
-      ) {
+      if (game.players.length > 6) {
         //sorry max players reach
         return;
       }
 
-      game.clients.push({
-        clientId: client.clientId,
-        nickname: client.nickname,
-        playerTitle: playerTitle,
+      // Save player nickname
+      player.nickname = result.nickname;
+
+      // Add player to game
+
+      game.players.push({
+        playerId: player.playerId,
+        nickname: player.nickname,
       });
 
-      // //start the game
-      // // updateGameState();
-      // if (game.clients.length >= 2) updateGameState();
-
       const payLoad = {
-        method: "join",
-        game: game,
+        method: "join-game",
+        game: games[gameId],
+        nickname: result.nickname,
       };
-      //loop through all clients and tell them that people has joined
-      game.clients.forEach((c) => {
-        clients[c.clientId].connection.send(JSON.stringify(payLoad));
+
+      game.players.forEach((player) => {
+        players[player.playerId].connection.send(JSON.stringify(payLoad));
       });
     }
 
-    //a wants to start the game
-    if (result.method === "start") {
-      const clientId = result.clientId;
-      const client = clients[clientId];
-      const nickname = result.nickname;
+    if (result.method === "start-game") {
       const gameId = result.gameId;
       const game = games[gameId];
 
-      if (!gameId || !game) {
+      game.answerCards = answers;
+      game.questionCards = questions;
+
+      // The initial position is 0 for 'start-game'
+      game.playerRotationPosition = 0;
+      game.players[game.playerRotationPosition].isAskingQuestion;
+
+      // Everyone gets to see the question card
+      game.questionCard = distributeCards(game.questionCards, 1);
+
+      game.players.forEach((player, index) => {
+        game.players[index].isAskingQuestion =
+          game.playerRotationPosition === index;
+        // The current asker shouldn't be able to play a card, so they need to know that they are the asker
         const payLoad = {
-          method: "invalid-game-id",
+          method: "start-game",
+          answerCards: distributeCards(game.answerCards, 5),
+          questionCard: game.questionCard,
+          isAskingQuestion: player.isAskingQuestion,
         };
-        const con = clients[clientId].connection;
-        con.send(JSON.stringify(payLoad));
-        return;
-      }
-
-      if (game.clients.length >= 6) {
-        //sorry max players reach
-        return;
-      }
-
-      game.clients.push({
-        clientId: client.clientId,
-        answerCards: distributeCards(game.answerCards),
-        nickname: client.nickname,
-        playerTitle: client.playerTitle,
+        console.log("🚀 ~ game.players.forEach ~ payLoad", payLoad);
+        players[player.playerId].connection.send(JSON.stringify(payLoad));
       });
 
-      //start the game
-      // updateGameState();
-      if (game.clients.length >= 2) updateGameState();
+      console.log(game.players);
+    }
 
-      const payLoad = {
-        method: "start",
-        game: game,
-      };
-      //loop through all clients and tell them that people has joined
-      game.clients.forEach((c) => {
-        clients[c.clientId].connection.send(JSON.stringify(payLoad));
+    if (result.method === "submit-card") {
+      const submittedCard = result.submittedCard;
+      const playerId = result.playerId;
+      const gameId = result.gameId;
+      const game = games[gameId];
+      // console.log("🚀 ~ connection.on ~ game", game);
+
+      // Adding submittedCard to game's submitted cards
+      game.submittedCards.push({ player: playerId, card: submittedCard });
+
+      game.players.forEach((player) => {
+        // If the person is asking the question, they should get the other cards
+        if (player.isAskingQuestion) {
+          const payLoad = {
+            method: "receive-answer-card",
+            submittedCards: game.submittedCards,
+          };
+          players[player.playerId].connection.send(JSON.stringify(payLoad));
+
+          // If all cards are submitted, start reviewing
+        }
+        if (game.submittedCards.length === game.players.length - 1) {
+          // If the person is asking the question, they should get the other cards
+
+          const payLoad = {
+            method: "start-card-review",
+          };
+          players[player.playerId].connection.send(JSON.stringify(payLoad));
+        }
       });
     }
 
-    //a user plays
-    if (result.method === "play") {
+    if (result.method === "show-current-answer") {
+      const playerId = result.playerId;
+      const answer = result.answer;
       const gameId = result.gameId;
-      const ballId = result.ballId;
-      const color = result.color;
-      let state = games[gameId].state;
-      if (!state) state = {};
+      const game = games[gameId];
 
-      state[ballId] = color;
-      games[gameId].state = state;
+      game.players.forEach((player) => {
+        const payLoad = {
+          method: "show-answer",
+          inFocusCard: { player: playerId, answer: answer },
+        };
+        players[player.playerId].connection.send(JSON.stringify(payLoad));
+      });
+    }
+
+    if (result.method === "select-winner") {
+      const winningPlayer = result.winningPlayer;
+      const gameId = result.gameId;
+      const game = games[gameId];
+
+      players[winningPlayer].wonCards++;
+      game.players.forEach((player) => {
+        const payLoad = {
+          method: "show-winner",
+          winningPlayer: playerId,
+        };
+        players[player.playerId].connection.send(JSON.stringify(payLoad));
+      });
     }
   });
 
-  //generate a new clientId
-  const clientId = guid();
-  clients[clientId] = {
-    clientId: clientId,
+  //generate a new playerId
+  const playerId = guid();
+  players[playerId] = {
+    playerId: playerId,
     nickname: null,
+    isAskingQuestion: false,
+    wonCards: 0,
     connection: connection,
   };
 
+  // on 'connect', send the playerId
   const payLoad = {
     method: "connect",
-    clientId: clientId,
-    playerTitle: getDefaultUserName(),
+    playerId: playerId,
   };
-  //send back the client connect
+  //send back the player connect
   connection.send(JSON.stringify(payLoad));
 });
-
-function updateGameState() {
-  //{"gameid", fasdfsf}
-  for (const g of Object.keys(games)) {
-    const game = games[g];
-    const payLoad = {
-      method: "update",
-      game: game,
-    };
-
-    game.clients.forEach((c) => {
-      clients[c.clientId].connection.send(JSON.stringify(payLoad));
-    });
-  }
-
-  setTimeout(updateGameState, 500);
-}
 
 // then to call it, plus stitch in '4' in the third group
 const guid = () => {
@@ -206,51 +215,27 @@ const guid = () => {
   return str;
 };
 
-function randomFromArray(array) {
-  return array[Math.floor(Math.random() * array.length)];
-}
-function getDefaultUserName() {
-  const levels = randomFromArray([
-    "Junior",
-    "Senior",
-    "10x",
-    "Staff",
-    "Rockstar",
-    "Mid",
-    "Basic ass",
-    "Ninja",
-    "Guru",
-    "Maverick",
-    "Wizard",
-  ]);
-
-  const roles = randomFromArray([
-    "PM",
-    "Developer",
-    "Designer",
-    "PO",
-    "Scrum Master",
-    "Enginner",
-    "UX Researcher",
-    "Dev Rel",
-    "Engineering Manger",
-  ]);
-
-  return `${levels} ${roles}`;
+function flatMap(arr, callback) {
+  return arr.map(callback).flat();
 }
 
-function distributeCards(array) {
+function distributeCards(array, numberOfCards) {
   // Check if the array has at least 5 elements
-  if (array.length < 5) {
+  if (array.length < numberOfCards) {
     return array;
   }
 
-  // Create a new arrayay with the first 5 elements of the original arrayay
-  let newArray = array.slice(0, 5);
+  // Create a new arrayay with the first numberOfCards elements of the original arrayay
+  let newArray = array.slice(0, numberOfCards);
 
-  // Remove the first 5 elements from the original arrayay
-  array.splice(0, 5);
+  // Remove the first numberOfCards elements from the original arrayay
+  array.splice(0, numberOfCards);
 
   // Return the new arrayay
-  return newArray;
+
+  if (newArray.length > 1) {
+    return newArray;
+  } else {
+    return newArray[0];
+  }
 }

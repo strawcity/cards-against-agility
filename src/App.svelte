@@ -1,50 +1,72 @@
 <script lang="ts">
   import Routes from "./Routes.svelte";
-  import { gameStore, playerList } from "./stores/game-store";
+  import { playerStore, gameStore } from "./stores/game-store";
+  import { navigate } from "svelte-routing";
   import { websocketStore } from "./stores/websocket-store";
 
-  websocketStore.connect("ws://localhost:9090");
+  websocketStore.connect("ws://localhost:1999");
   websocketStore.onmessage((message) => {
     const response = JSON.parse(message.data);
 
     switch (response.method) {
       case "connect":
-        $gameStore.clientId = response.clientId;
-        $gameStore.playerTitle = response.playerTitle;
-        return;
+        $playerStore.playerId = response.playerId;
+        break;
 
-      case "return-nickname":
-        $gameStore.nickname = response.nickname;
-        return;
-
-      case "create":
-        if (response.game.id) {
-          location.href = `/${response.game.id}`;
+      case "create-game":
+        $gameStore.id = response.game.id;
+        $gameStore.players = response.game.players;
+        $playerStore.nickname = response.nickname;
+        if (response.game.id && response.nickname) {
+          navigate(`/${response.game.id}`);
         }
-        return;
+
+        break;
+      case "join-game":
+        $playerStore.nickname = response.nickname;
+        $gameStore.players = response.game.players;
+        $gameStore.id = response.game.id;
+        $playerStore.nickname = response.nickname;
+
+        break;
+
+      case "start-game":
+        $playerStore.answerCards = response.answerCards;
+
+        $playerStore.answerCards = response.answerCards;
+        $playerStore.isAskingQuestion = response.isAskingQuestion;
+        $gameStore.questionCard = response.questionCard;
+        if ($playerStore.answerCards) {
+          navigate("active-game");
+        }
+
+        break;
+
+      case "receive-answer-card":
+        $gameStore.submittedCards = response.submittedCards;
+
+        break;
+
+      case "start-card-review":
+        $gameStore.isReviewingCards = true;
+        break;
+
+      case "show-answer":
+        $gameStore.answerInFocus = response.inFocusCard;
+        break;
+
+      case "show-winner":
+        $gameStore.isReviewingCards = false;
+        $gameStore.winner = response.winningPlayer;
+        break;
+
+      case "next-round":
+        $gameStore.isReviewingCards = false;
+        break;
 
       case "invalid-game-id":
         alert("Couldn't find that game!");
-        return;
-
-      case "join":
-        const game = response.game;
-        function flatMap(arr, callback) {
-          return arr.map(callback).flat();
-        }
-
-        $playerList = flatMap(game.clients, (obj) => {
-          return [`${obj.playerTitle} ${obj.nickname}`];
-        });
-        let curentClient = game.clients.find((client) => {
-          return client.clientId === $gameStore.clientId;
-        });
-
-        if (curentClient.answerCards) {
-          $gameStore.answerCards = curentClient.answerCards;
-        }
-
-        return;
+        break;
     }
   });
 
