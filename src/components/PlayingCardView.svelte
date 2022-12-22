@@ -14,7 +14,7 @@
     playerId = playerStore.playerId;
   });
 
-  $: if ($gameStore.isReviewingCards === false) {
+  $: if ($gameStore.isInRetro === false) {
     hasSubmittedCard = false;
     selectedCard = null;
   }
@@ -53,7 +53,7 @@
   </h3>
 </div>
 
-{#if hasSubmittedCard && !$gameStore.isReviewingCards}
+{#if hasSubmittedCard && !$gameStore.isInRetro}
   <h3>Waiting for other players</h3>
 {/if}
 

@@ -48,9 +48,7 @@
         break;
 
       case "start-card-review":
-        console.log("🚀 ~ websocketStore.onmessage ~ start-card-review");
-        $gameStore.isReviewingCards = true;
-        console.log("🚀 ~ websocketStore.onmessage ~ $gameStore", $gameStore);
+        $gameStore.isInRetro = true;
         break;
 
       case "show-answer":
@@ -58,16 +56,15 @@
         break;
 
       case "show-winner":
-        $gameStore.isReviewingCards = false;
+        $gameStore.isInRetro = false;
         $gameStore.winner = response.winningPlayer;
         break;
 
       case "new-round":
-        $gameStore.isReviewingCards = false;
+        $gameStore.isInRetro = false;
         $gameStore.answerInFocus = null;
         $gameStore.winner = null;
         $playerStore.answerCards = response.answerCards;
-        console.log("🚀 ~ websocketStore.onmessage ~ response", response);
         $playerStore.isAskingQuestion = response.isAskingQuestion;
         $gameStore.questionCard = response.questionCard;
 
@@ -85,6 +82,8 @@
   // };
 </script>
 
-<main class="flex flex-col w-full h-screen items-center justify-center">
+<main
+  class="flex flex-col w-full h-screen items-center justify-center font-unbounded"
+>
   <Routes />
 </main>

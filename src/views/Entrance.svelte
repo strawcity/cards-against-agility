@@ -23,29 +23,34 @@
 </script>
 
 <div class="flex flex-col gap-5">
-  <h1 class="text-green-500">Welcome, to Cards Against Agility!</h1>
+  <h1 class="font-bold text-2xl uppercase">Cards Against Agility</h1>
 
-  <form on:submit|preventDefault={handleSaveNicknamelick}>
-    <label>
-      <h1 class="text-green-500">Choose a job title and a nickname</h1>
-      <div class="flex flex-col">
-        <input class="border border-green-300 " bind:value={tempNickname} />
-      </div>
-    </label>
+  <div>
+    <form on:submit|preventDefault={handleSaveNicknamelick}>
+      <label>
+        <div class="flex items-center">
+          <input
+            class="border-b border-blue-700 font-semibold"
+            bind:value={tempNickname}
+          />
+        </div>
+      </label>
+    </form>
+    {jobTitle}
+  </div>
 
+  <div>
     <button
-      disabled={!tempNickname}
-      class={classNames("border text-white bg-blue-700 rounded-2xl p-3", {
-        "opacity-30": !tempNickname,
-      })}
-      >Save nickname and open a lobby
-    </button>
-  </form>
-
-  {tempNickname ? tempNickname : ""}, {jobTitle}
-
+      class="border border-blue-300 rounded-2xl p-3"
+      on:click={getNewJobTitle}>Generate new job title</button
+    >
+  </div>
   <button
-    class="border border-blue-300 rounded-2xl p-3"
-    on:click={getNewJobTitle}>Generate new job title</button
-  >
+    on:click|once={handleSaveNicknamelick}
+    disabled={!tempNickname}
+    class={classNames("border text-white bg-blue-700 rounded-2xl p-3", {
+      "opacity-30": !tempNickname,
+    })}
+    >Save nickname and open a lobby
+  </button>
 </div>

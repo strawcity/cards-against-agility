@@ -64,14 +64,13 @@
 <div class="flex w-full justify-center flex-wrap gap-4 px-5">
   {#each players as player}
     <button
-      on:click={() =>
-        $gameStore.isReviewingCards ? handleRevealClick(player) : null}
+      on:click={() => ($gameStore.isInRetro ? handleRevealClick(player) : null)}
       class={classNames(
         "rounded-2xl shrink-0 border transition-all border-dashed duration-150 w-40 h-52 flex justify-center items-center text-center p-5 shadow",
         {
           "bg-black text-white  border-none": player.card,
           "text-blue-700 border-blue-700 bg-white opacity-40": !player.card,
-          "cursor-pointer": $gameStore.isReviewingCards,
+          "cursor-pointer": $gameStore.isInRetro,
         }
       )}
     >

@@ -58,34 +58,52 @@
   </div>
 {/if}
 
-<div>
+<div class="flex flex-col gap-5">
   {#if $gameStore.players}
-    {#each $gameStore.players as player}
-      <p>{player.nickname}</p>
-    {/each} is in the lobby!
-
+    <div>
+      {#each $gameStore.players as player}
+        <p class="font-semibold">{player.nickname}</p>
+      {/each} is in the lobby!
+    </div>
     <button
       class="border w-72 border-blue-300 rounded-2xl p-3 mt-5"
       on:click={copyToClipboard}>Share a link with your friend</button
     >
-    <!-- {#if $gameStore.players.length >= 3} -->
-    <button
-      class="border w-72 bg-blue-700 text-white rounded-2xl p-3 mt-5"
-      on:click|once={handleStartGameClick}>Start game</button
-    >
+    {#if $gameStore.players.length >= 3}
+      <button
+        class="border w-72 bg-blue-700 text-white rounded-2xl p-3 mt-5"
+        on:click|once={handleStartGameClick}>Start game</button
+      >
+    {/if}
   {/if}
-  <!-- {/if} -->
 </div>
 
 {#if !$gameStore.players}
-  <form on:submit|preventDefault={handleJoinGameClick}>
-    <label>
-      Choose a job title and a nickname
-      <div class="flex flex-col">
-        <input class="border border-green-300 " bind:value={tempNickname} />
-      </div>
-    </label>
+  <div class="flex flex-col gap-5">
+    <h1 class="font-bold text-2xl uppercase">Cards Against Agility</h1>
+
+    <div>
+      <form on:submit|preventDefault={handleJoinGameClick}>
+        <label>
+          <div class="flex items-center">
+            <input
+              class="border-b border-blue-700 font-semibold"
+              bind:value={tempNickname}
+            />
+          </div>
+        </label>
+      </form>
+      {jobTitle}
+    </div>
+
+    <div>
+      <button
+        class="border border-blue-300 rounded-2xl p-3"
+        on:click={getNewJobTitle}>Generate new job title</button
+      >
+    </div>
     <button
+      on:click|once={handleJoinGameClick}
       disabled={!tempNickname}
       class={classNames("border text-white bg-blue-700 rounded-2xl p-3", {
         "opacity-30": !tempNickname,
@@ -93,11 +111,35 @@
     >
       Save nickname and join lobby
     </button>
-  </form>
-  {tempNickname ? tempNickname : ""}, {jobTitle}
-
-  <button
-    class="border border-blue-300 rounded-2xl p-3"
-    on:click={getNewJobTitle}>Generate new job title</button
-  >
+  </div>
+  <!-- <div class="flex flex-col gap-5">
+    <div>
+      <form on:submit|preventDefault={handleJoinGameClick}>
+        <label>
+          Choose a job title and a nickname
+          <div class="flex items-center">
+            <input
+              class="border-b border-blue-700 font-semibold"
+              bind:value={tempNickname}
+            />
+          </div>
+        </label>
+        {jobTitle}
+      </form>
+    </div>
+    <div>
+      <button
+        class="border border-blue-300 rounded-2xl p-3"
+        on:click={getNewJobTitle}>Generate new job title</button
+      >
+      <button
+        disabled={!tempNickname}
+        class={classNames("border text-white bg-blue-700 rounded-2xl p-3", {
+          "opacity-30": !tempNickname,
+        })}
+      >
+        Save nickname and join lobby
+      </button>
+    </div>
+  </div> -->
 {/if}
