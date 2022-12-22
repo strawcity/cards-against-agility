@@ -80,6 +80,15 @@ export function selectWinner(winningPlayer) {
   websocketStore.send(payLoad);
 }
 
+export function newRound() {
+  const payLoad = {
+    method: "new-round",
+    gameId: storedGameId,
+  };
+
+  websocketStore.send(payLoad);
+}
+
 function randomFromArray(array) {
   return array[Math.floor(Math.random() * array.length)];
 }

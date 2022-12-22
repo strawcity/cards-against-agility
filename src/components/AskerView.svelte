@@ -3,6 +3,7 @@
   import classNames from "classnames";
   import {
     distributeCurrentAnswerInFocus,
+    newRound,
     selectWinner,
   } from "../helpers/gameFunctions";
   import { replaceLine } from "./../helpers/replaceLine";
@@ -28,6 +29,7 @@
   }
 
   function handleRevealClick(player: Player) {
+    console.log("🚀 ~ handleRevealClick ~ player", player);
     distributeCurrentAnswerInFocus(player.playerId, player.card);
   }
 
@@ -36,7 +38,7 @@
   }
 
   function handleNextRoundClick() {
-    console.log("next round");
+    newRound();
   }
 </script>
 
@@ -47,9 +49,14 @@
 >
   <h3>
     {#if $gameStore.answerInFocus}
-      {@html $gameStore.answerInFocus.answer}
+      {@html replaceLine(
+        $gameStore.questionCard,
+        $gameStore.answerInFocus.answer
+      )}
     {:else}
-      {@html replaceLine($gameStore.questionCard)}
+      {@html !!$gameStore.questionCard
+        ? replaceLine($gameStore.questionCard)
+        : null}
     {/if}
   </h3>
 </div>

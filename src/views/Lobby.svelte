@@ -78,21 +78,26 @@
 </div>
 
 {#if !$gameStore.players}
-  <h1 class="text-green-500">Choose a job title and a nickname</h1>
-  <div class="flex flex-col">
-    <input class="border border-green-300 " bind:value={tempNickname} />
-    {jobTitle}
-  </div>
+  <form on:submit|preventDefault={handleJoinGameClick}>
+    <label>
+      Choose a job title and a nickname
+      <div class="flex flex-col">
+        <input class="border border-green-300 " bind:value={tempNickname} />
+      </div>
+    </label>
+    <button
+      disabled={!tempNickname}
+      class={classNames("border text-white bg-blue-700 rounded-2xl p-3", {
+        "opacity-30": !tempNickname,
+      })}
+    >
+      Save nickname and join lobby
+    </button>
+  </form>
+  {tempNickname ? tempNickname : ""}, {jobTitle}
 
   <button
     class="border border-blue-300 rounded-2xl p-3"
     on:click={getNewJobTitle}>Generate new job title</button
-  >
-  <button
-    disabled={!tempNickname}
-    class={classNames("border text-white bg-blue-700 rounded-2xl p-3", {
-      "opacity-30": !tempNickname,
-    })}
-    on:click={handleJoinGameClick}>Save nickname and join lobby</button
   >
 {/if}

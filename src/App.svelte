@@ -48,7 +48,9 @@
         break;
 
       case "start-card-review":
+        console.log("🚀 ~ websocketStore.onmessage ~ start-card-review");
         $gameStore.isReviewingCards = true;
+        console.log("🚀 ~ websocketStore.onmessage ~ $gameStore", $gameStore);
         break;
 
       case "show-answer":
@@ -60,8 +62,15 @@
         $gameStore.winner = response.winningPlayer;
         break;
 
-      case "next-round":
+      case "new-round":
         $gameStore.isReviewingCards = false;
+        $gameStore.answerInFocus = null;
+        $gameStore.winner = null;
+        $playerStore.answerCards = response.answerCards;
+        console.log("🚀 ~ websocketStore.onmessage ~ response", response);
+        $playerStore.isAskingQuestion = response.isAskingQuestion;
+        $gameStore.questionCard = response.questionCard;
+
         break;
 
       case "invalid-game-id":

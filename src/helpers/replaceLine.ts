@@ -7,6 +7,7 @@ export function replaceLine(
   const oneLineRegex = /---/;
   const twoLineRegex = /----/;
   const threeLineRegex = /-----/;
+
   if (answerOne || answerTwo || answerThree) {
     return question
       .replace(oneLineRegex, `<b> ${answerOne}</b>`)
