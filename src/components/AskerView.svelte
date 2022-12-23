@@ -17,6 +17,8 @@
     players = addCard(players, $gameStore.submittedCards);
   }
 
+  console.log("🚀 ~ $gameStore.isInRetro", $gameStore.isInRetro);
+
   function addCard(playersArray, cardsArray) {
     for (let i = 0; i < playersArray.length; i++) {
       for (let j = 0; j < cardsArray.length; j++) {
@@ -29,7 +31,6 @@
   }
 
   function handleRevealClick(player: Player) {
-    console.log("🚀 ~ handleRevealClick ~ player", player);
     distributeCurrentAnswerInFocus(player.playerId, player.card);
   }
 
@@ -68,9 +69,10 @@
       class={classNames(
         "rounded-2xl shrink-0 border transition-all border-dashed duration-150 w-40 h-52 flex justify-center items-center text-center p-5 shadow",
         {
-          "bg-black text-white  border-none": player.card,
-          "text-blue-700 border-blue-700 bg-white opacity-40": !player.card,
+          "bg-black text-white  border-none ": player.card,
+          "text-blue-700 border-blue-700 bg-white opacity-40 ": !player.card,
           "cursor-pointer": $gameStore.isInRetro,
+          "opacity-40": player.card !== $gameStore?.answerInFocus?.answer,
         }
       )}
     >

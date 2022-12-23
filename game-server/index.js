@@ -198,6 +198,7 @@ wsServer.on("request", (request) => {
         const payLoad = {
           method: "show-winner",
           winningPlayer: playerId,
+          wonCards: players[player.playerId].wonCards
         };
 
         players[player.playerId].connection.send(JSON.stringify(payLoad));
@@ -212,7 +213,9 @@ wsServer.on("request", (request) => {
 
       // Everyone gets to see the question card
       game.questionCard = distributeCards(game.questionCards, 1);
-
+      if (game.playerRotationPosition === game.players.length) {
+        game.playerRotationPosition = 0
+      }
       game.players.forEach((player, index) => {
         game.players[index].isAskingQuestion =
           game.playerRotationPosition === index;
