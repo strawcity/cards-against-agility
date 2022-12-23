@@ -38,7 +38,7 @@
 {/if}
 <div
   class={classNames(
-    "mb-12 rounded-2xl shrink-0 border transition-all text-white duration-150 bg-blue-700 w-44 h-56 flex justify-center items-center text-center p-5 shadow-md"
+    "mb-12 rounded-2xl shrink-0 border transition-all text-white duration-150 bg-blue-700 w-52 h-64 flex justify-center items-center text-center p-5 shadow-md"
   )}
 >
   <h3>

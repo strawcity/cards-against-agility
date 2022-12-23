@@ -1,11 +1,19 @@
 <script lang="ts">
-  import { playerStore } from "../stores/game-store";
+  import { playerStore, gameStore } from "../stores/game-store";
   import AskerView from "./../components/AskerView.svelte";
   import PlayingCardView from "./../components/PlayingCardView.svelte";
 </script>
 
 {#if $playerStore.wonCards > 0}
   <div class="w-full h-4 absolute top-0">Points: {$playerStore.wonCards}</div>
+{/if}
+
+{#if $gameStore.isInRetro}
+  <div
+    class="absolute p-5 top-0 w-full bg-blue-300 flex justify-center items-center"
+  >
+    R E T R O S P E C T I V E
+  </div>
 {/if}
 
 {#if $playerStore.isAskingQuestion}

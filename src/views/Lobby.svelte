@@ -12,10 +12,8 @@
   let playerId;
   let nickname;
   let showCopiedBanner = false;
-  let selectedCard;
   let jobTitle = generateJobTitle();
   let tempNickname;
-  const regex = /---/;
 
   playerStore.subscribe((store) => {
     const playerStore = store;
@@ -28,10 +26,6 @@
   }
   function handleStartGameClick() {
     startGame(gameId);
-  }
-
-  function selectCard(card) {
-    selectedCard = card;
   }
 
   function getNewJobTitle() {
@@ -60,10 +54,11 @@
 
 <div class="flex flex-col gap-5">
   {#if $gameStore.players}
-    <div>
-      {#each $gameStore.players as player}
-        <p class="font-semibold">{player.nickname}</p>
-      {/each} is in the lobby!
+    LOBBY
+    <div class="p-4 border border-blue-700">
+      {#each $gameStore.players as player, index}
+        <p class="font-semibold">{index + 1}. {player.nickname}</p>
+      {/each}
     </div>
     <button
       class="border w-72 border-blue-300 rounded-2xl p-3 mt-5"

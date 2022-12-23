@@ -17,8 +17,6 @@
     players = addCard(players, $gameStore.submittedCards);
   }
 
-  console.log("🚀 ~ $gameStore.isInRetro", $gameStore.isInRetro);
-
   function addCard(playersArray, cardsArray) {
     for (let i = 0; i < playersArray.length; i++) {
       for (let j = 0; j < cardsArray.length; j++) {
