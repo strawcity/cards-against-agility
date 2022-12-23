@@ -343,7 +343,7 @@ const questions = [
   "Why do i hurt all over? ---",
   "What's that sound? --- ",
   "I drink to forget ---.",
-  "Step 1: --- Step 2: --- Step 3: Profit",
+  // "Step 1: --- Step 2: ---- Step 3: Profit",
   "The theme for next year's Eurovision Song Contest is 'We are ---'",
   "--- good to the last drop.",
   // "For my next trick I will pull --- out of----",
@@ -363,7 +363,7 @@ const questions = [
   "We have always done ---",
   "Don't show --- in the review!",
   "--- really turns me on!",
-  "We tried- -- already, and it does not work.",
+  "We tried --- already, and it does not work.",
   "--- was not in the contract",
 ]
 

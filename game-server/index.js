@@ -36,7 +36,7 @@ wsServer.on("request", (request) => {
 
       // Add player to game
       const game = games[gameId];
-      console.log("🚀 ~ connection.on ~ game", game);
+
       game.players.push({
         playerId: player.playerId,
         nickname: player.nickname,
@@ -102,18 +102,21 @@ wsServer.on("request", (request) => {
       game.players.forEach((player, index) => {
         game.players[index].isAskingQuestion =
           game.playerRotationPosition === index;
+
+        players[player.playerId].answerCards = distributeCards(
+          game.answerCards,
+          5
+        );
+
         // The current asker shouldn't be able to play a card, so they need to know that they are the asker
         const payLoad = {
           method: "start-game",
-          answerCards: distributeCards(game.answerCards, 5),
-          questionCard: game.questionCard,
+          answerCards: players[player.playerId].answerCards,
+          questionCard: game.questionCard[0],
           isAskingQuestion: player.isAskingQuestion,
         };
-        console.log("🚀 ~ game.players.forEach ~ payLoad", payLoad);
         players[player.playerId].connection.send(JSON.stringify(payLoad));
       });
-
-      console.log(game.players);
     }
 
     if (result.method === "submit-card") {
@@ -121,10 +124,14 @@ wsServer.on("request", (request) => {
       const playerId = result.playerId;
       const gameId = result.gameId;
       const game = games[gameId];
-      // console.log("🚀 ~ connection.on ~ game", game);
 
       // Adding submittedCard to game's submitted cards
       game.submittedCards.push({ player: playerId, card: submittedCard });
+
+      // Remove card from answerCards array
+      players[playerId].answerCards = players[playerId].answerCards.filter(
+        (card) => card !== submittedCard
+      );
 
       game.players.forEach((player) => {
         // If the person is asking the question, they should get the other cards
@@ -137,9 +144,9 @@ wsServer.on("request", (request) => {
 
           // If all cards are submitted, start reviewing
         }
+
         if (game.submittedCards.length === game.players.length - 1) {
           // If the person is asking the question, they should get the other cards
-
           const payLoad = {
             method: "start-card-review",
           };
@@ -169,11 +176,50 @@ wsServer.on("request", (request) => {
       const game = games[gameId];
 
       players[winningPlayer].wonCards++;
+
       game.players.forEach((player) => {
         const payLoad = {
           method: "show-winner",
           winningPlayer: playerId,
         };
+
+        players[player.playerId].connection.send(JSON.stringify(payLoad));
+      });
+    }
+
+    if (result.method === "new-round") {
+      const gameId = result.gameId;
+      const game = games[gameId];
+      game.playerRotationPosition++;
+      game.submittedCards = []
+
+      // Everyone gets to see the question card
+      game.questionCard = distributeCards(game.questionCards, 1);
+
+      console.log(
+        "🚀 ~ connection.on ~ game.playerRotationPosition",
+        game.playerRotationPosition
+      );
+
+      game.players.forEach((player, index) => {
+        game.players[index].isAskingQuestion =
+          game.playerRotationPosition === index;
+
+        console.log(players[player.playerId].answerCards.length);
+        const newCards = distributeCards(
+          game.answerCards,
+          5 - players[player.playerId].answerCards.length
+        );
+        console.log("🚀 ~ game.players.forEach ~ newCards", newCards)
+        players[player.playerId].answerCards = players[player.playerId].answerCards.concat(newCards);
+        console.log("🚀 ~ game.players.forEach ~ players[player.playerId].answerCards", players[player.playerId].answerCards)
+        const payLoad = {
+          method: "new-round",
+          answerCards: players[player.playerId].answerCards,
+          questionCard: game.questionCard[0],
+          isAskingQuestion: player.isAskingQuestion,
+        };
+
         players[player.playerId].connection.send(JSON.stringify(payLoad));
       });
     }
@@ -186,6 +232,7 @@ wsServer.on("request", (request) => {
     nickname: null,
     isAskingQuestion: false,
     wonCards: 0,
+    answerCards: [],
     connection: connection,
   };
 
@@ -220,22 +267,26 @@ function flatMap(arr, callback) {
 }
 
 function distributeCards(array, numberOfCards) {
-  // Check if the array has at least 5 elements
+  // Check if the array has at least the required number of elements
   if (array.length < numberOfCards) {
     return array;
   }
 
-  // Create a new arrayay with the first numberOfCards elements of the original arrayay
-  let newArray = array.slice(0, numberOfCards);
+  // Create a new array to hold the randomly selected strings
+  let newArray = [];
 
-  // Remove the first numberOfCards elements from the original arrayay
-  array.splice(0, numberOfCards);
+  // Select random strings from the array and add them to the new array
+  for (let i = 0; i < numberOfCards; i++) {
+    // Generate a random index between 0 and the length of the array
+    const index = Math.floor(Math.random() * array.length);
 
-  // Return the new arrayay
+    // Remove the element at the random index from the array using splice()
+    const element = array.splice(index, 1)[0];
 
-  if (newArray.length > 1) {
-    return newArray;
-  } else {
-    return newArray[0];
+    // Add the element to the new array
+    newArray.push(element);
   }
+
+  // Return the new array
+  return newArray;
 }

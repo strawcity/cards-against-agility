@@ -48,7 +48,7 @@
         break;
 
       case "start-card-review":
-        $gameStore.isReviewingCards = true;
+        $gameStore.isInRetro = true;
         break;
 
       case "show-answer":
@@ -56,12 +56,17 @@
         break;
 
       case "show-winner":
-        $gameStore.isReviewingCards = false;
         $gameStore.winner = response.winningPlayer;
         break;
 
-      case "next-round":
-        $gameStore.isReviewingCards = false;
+      case "new-round":
+        $gameStore.isInRetro = false;
+        $gameStore.answerInFocus = null;
+        $gameStore.winner = null;
+        $playerStore.answerCards = response.answerCards;
+        $playerStore.isAskingQuestion = response.isAskingQuestion;
+        $gameStore.questionCard = response.questionCard;
+
         break;
 
       case "invalid-game-id":
@@ -76,6 +81,8 @@
   // };
 </script>
 
-<main class="flex flex-col w-full h-screen items-center justify-center">
+<main
+  class="flex flex-col w-full h-screen items-center justify-center font-unbounded"
+>
   <Routes />
 </main>

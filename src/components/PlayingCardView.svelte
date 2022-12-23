@@ -13,9 +13,16 @@
     const playerStore = store;
     playerId = playerStore.playerId;
   });
-  function selectAnswer(card) {
-    selectedCard = replaceLine($gameStore.questionCard, card);
+
+  $: if ($gameStore.isInRetro === false) {
+    hasSubmittedCard = false;
+    selectedCard = null;
   }
+
+  function selectAnswer(card) {
+    selectedCard = card;
+  }
+
   function handleSubmitCardClick() {
     submitCard(playerId, selectedCard);
     hasSubmittedCard = true;
@@ -36,14 +43,17 @@
 >
   <h3>
     {#if $gameStore.answerInFocus}
-      {@html $gameStore.answerInFocus.answer}
+      {@html replaceLine(
+        $gameStore.questionCard,
+        $gameStore.answerInFocus.answer
+      )}
     {:else}
-      {@html selectedCard ? selectedCard : replaceLine($gameStore.questionCard)}
+      {@html replaceLine($gameStore.questionCard, selectedCard)}
     {/if}
   </h3>
 </div>
 
-{#if hasSubmittedCard && !$gameStore.isReviewingCards}
+{#if hasSubmittedCard && !$gameStore.isInRetro}
   <h3>Waiting for other players</h3>
 {/if}
 
