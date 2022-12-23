@@ -56,7 +56,6 @@
         break;
 
       case "show-winner":
-        $gameStore.isInRetro = false;
         $gameStore.winner = response.winningPlayer;
         break;
 

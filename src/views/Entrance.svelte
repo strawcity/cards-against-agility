@@ -16,8 +16,7 @@
     jobTitle = generateJobTitle();
   }
 
-  function handleSaveNicknamelick() {
-    console.log("🚀 ~ handleSaveNicknamelick ~ handleSaveNicknamelick");
+  function handleSaveNicknameClick() {
     createGame(tempNickname + ", " + jobTitle);
   }
 </script>
@@ -26,7 +25,7 @@
   <h1 class="font-bold text-2xl uppercase">Cards Against Agility</h1>
 
   <div>
-    <form on:submit|preventDefault={handleSaveNicknamelick}>
+    <form on:submit|preventDefault={handleSaveNicknameClick}>
       <label>
         <div class="flex items-center">
           <input
@@ -46,7 +45,7 @@
     >
   </div>
   <button
-    on:click|once={handleSaveNicknamelick}
+    on:click|once={handleSaveNicknameClick}
     disabled={!tempNickname}
     class={classNames("border text-white bg-blue-700 rounded-2xl p-3", {
       "opacity-30": !tempNickname,
