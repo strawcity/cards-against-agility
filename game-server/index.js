@@ -6,6 +6,22 @@ httpServer.listen(1999, () => console.log("Listening.. on 1999"));
 
 const players = {};
 const games = {};
+const thirtyMinutes = 30 * 60 * 1000;
+
+setInterval(function () {
+  let currentTime = Date.now();
+  for (let game in games) {
+    if (currentTime - games[game].timestamp > 30000) {
+      delete games[game];
+    }
+  }
+  for (let player in players) {
+
+    if (currentTime - players[player].timestamp > 30000) {
+      delete players[player];
+    }
+  }
+}, thirtyMinutes);
 
 const wsServer = new websocketServer({
   httpServer: httpServer,
@@ -29,6 +45,7 @@ wsServer.on("request", (request) => {
       // get a gameId, create a game
       const gameId = guid();
       games[gameId] = {
+        timestamp: Date.now(),
         id: gameId,
         players: [],
         submittedCards: [],
@@ -181,6 +198,7 @@ wsServer.on("request", (request) => {
         const payLoad = {
           method: "show-winner",
           winningPlayer: playerId,
+          wonCards: players[player.playerId].wonCards
         };
 
         players[player.playerId].connection.send(JSON.stringify(payLoad));
@@ -195,24 +213,18 @@ wsServer.on("request", (request) => {
 
       // Everyone gets to see the question card
       game.questionCard = distributeCards(game.questionCards, 1);
-
-      console.log(
-        "🚀 ~ connection.on ~ game.playerRotationPosition",
-        game.playerRotationPosition
-      );
-
+      if (game.playerRotationPosition === game.players.length - 1) {
+        game.playerRotationPosition = 0
+      }
       game.players.forEach((player, index) => {
         game.players[index].isAskingQuestion =
           game.playerRotationPosition === index;
 
-        console.log(players[player.playerId].answerCards.length);
         const newCards = distributeCards(
           game.answerCards,
           5 - players[player.playerId].answerCards.length
         );
-        console.log("🚀 ~ game.players.forEach ~ newCards", newCards)
         players[player.playerId].answerCards = players[player.playerId].answerCards.concat(newCards);
-        console.log("🚀 ~ game.players.forEach ~ players[player.playerId].answerCards", players[player.playerId].answerCards)
         const payLoad = {
           method: "new-round",
           answerCards: players[player.playerId].answerCards,
@@ -228,6 +240,7 @@ wsServer.on("request", (request) => {
   //generate a new playerId
   const playerId = guid();
   players[playerId] = {
+    timestamp: Date.now(),
     playerId: playerId,
     nickname: null,
     isAskingQuestion: false,
@@ -262,9 +275,6 @@ const guid = () => {
   return str;
 };
 
-function flatMap(arr, callback) {
-  return arr.map(callback).flat();
-}
 
 function distributeCards(array, numberOfCards) {
   // Check if the array has at least the required number of elements

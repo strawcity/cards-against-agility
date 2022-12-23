@@ -5,6 +5,7 @@ interface PlayerStore {
   nickname: string;
   answerCards: string[];
   isAskingQuestion: boolean;
+  wonCards: number;
 }
 
 interface GameStore {
@@ -37,6 +38,7 @@ export const playerStore = writable<PlayerStore>({
   nickname: null,
   answerCards: null,
   isAskingQuestion: false,
+  wonCards: 0,
 });
 
 export const gameStore = writable<GameStore>({
