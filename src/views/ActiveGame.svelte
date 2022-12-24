@@ -10,9 +10,15 @@
 
 {#if $gameStore.isInRetro}
   <div
-    class="absolute p-5 top-0 w-full bg-blue-300 flex justify-center items-center"
+    class="absolute p-5 top-0 w-full bg-blue-700 flex justify-center items-center"
   >
     R E T R O S P E C T I V E
+  </div>
+{:else}
+  <div
+    class="absolute p-5 top-0 w-full bg-blue-307 flex justify-center items-center"
+  >
+    S P R I N T
   </div>
 {/if}
 

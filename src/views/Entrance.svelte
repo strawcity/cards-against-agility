@@ -2,6 +2,7 @@
   import { playerStore } from "../stores/game-store";
   import { createGame, generateJobTitle } from "../helpers/gameFunctions";
   import classNames from "classnames";
+  import Header from "./Header.svelte";
 
   let playerId;
   let tempNickname;
@@ -21,9 +22,8 @@
   }
 </script>
 
+<Header />
 <div class="flex flex-col gap-5">
-  <h1 class="font-bold text-2xl uppercase">Cards Against Agility</h1>
-
   <div>
     <form on:submit|preventDefault={handleSaveNicknameClick}>
       <label>

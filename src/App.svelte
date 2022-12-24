@@ -3,6 +3,7 @@
   import { playerStore, gameStore } from "./stores/game-store";
   import { navigate } from "svelte-routing";
   import { websocketStore } from "./stores/websocket-store";
+  import Footer from "./views/Footer.svelte";
   websocketStore.connect("ws://localhost:1999");
   websocketStore.onmessage((message) => {
     const response = JSON.parse(message.data);
@@ -80,4 +81,5 @@
   class="flex flex-col w-full h-screen items-center justify-center font-unbounded"
 >
   <Routes />
+  <Footer />
 </main>

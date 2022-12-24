@@ -14,6 +14,7 @@
   let showCopiedBanner = false;
   let jobTitle = generateJobTitle();
   let tempNickname;
+  import Header from "./Header.svelte";
 
   playerStore.subscribe((store) => {
     const playerStore = store;
@@ -42,6 +43,7 @@
   }
 </script>
 
+<Header />
 {#if showCopiedBanner}
   <div
     in:fly={{ y: -64, duration: 500 }}
@@ -75,8 +77,6 @@
 
 {#if !$gameStore.players}
   <div class="flex flex-col gap-5">
-    <h1 class="font-bold text-2xl uppercase">Cards Against Agility</h1>
-
     <div>
       <form on:submit|preventDefault={handleJoinGameClick}>
         <label>
@@ -107,34 +107,4 @@
       Save nickname and join lobby
     </button>
   </div>
-  <!-- <div class="flex flex-col gap-5">
-    <div>
-      <form on:submit|preventDefault={handleJoinGameClick}>
-        <label>
-          Choose a job title and a nickname
-          <div class="flex items-center">
-            <input
-              class="border-b border-blue-700 font-semibold"
-              bind:value={tempNickname}
-            />
-          </div>
-        </label>
-        {jobTitle}
-      </form>
-    </div>
-    <div>
-      <button
-        class="border border-blue-300 rounded-2xl p-3"
-        on:click={getNewJobTitle}>Generate new job title</button
-      >
-      <button
-        disabled={!tempNickname}
-        class={classNames("border text-white bg-blue-700 rounded-2xl p-3", {
-          "opacity-30": !tempNickname,
-        })}
-      >
-        Save nickname and join lobby
-      </button>
-    </div>
-  </div> -->
 {/if}
