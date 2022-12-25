@@ -2,7 +2,7 @@ const { answers, questions } = require("./cards/data.cjs");
 const http = require("http");
 const websocketServer = require("websocket").server;
 const httpServer = http.createServer();
-httpServer.listen(1999, () => console.log("Listening.. on 1999"));
+httpServer.listen(8080, () => console.log("Listening.. on 8080"));
 
 const players = {};
 const games = {};
