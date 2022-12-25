@@ -15,6 +15,7 @@
 
   $: if ($gameStore.submittedCards?.length > 0) {
     players = addCard(players, $gameStore.submittedCards);
+    console.log("🚀 ~ players", players);
   }
 
   function addCard(playersArray, cardsArray) {
@@ -67,8 +68,9 @@
       class={classNames(
         "rounded-2xl shrink-0 border transition-all border-dashed duration-150 w-40 h-52 flex justify-center items-center text-center p-5 shadow",
         {
-          "bg-black text-white  border-none ": player.card,
-          "text-blue-700 border-blue-700 bg-white opacity-40 ": !player.card,
+          "bg-black text-white  border-none ": $gameStore.isInRetro,
+          "text-blue-700 border-blue-700 bg-white opacity-40 ":
+            !$gameStore.isInRetro,
           "cursor-pointer": $gameStore.isInRetro,
           "opacity-40": player.card !== $gameStore?.answerInFocus?.answer,
         }
@@ -83,17 +85,19 @@
   {#if $gameStore.winner}
     <button
       on:click={handleNextRoundClick}
-      class="border border-blue-700 w-72 bg-white text-blue-700 rounded-2xl p-3 mt-5"
+      class="border  text-white bg-blue-700 rounded-2xl p-3 mt-5"
       >Start next round!</button
     >
   {:else}
     <button
       on:click={handleSelectWinnerClick}
-      class="border border-blue-700 w-72 bg-white text-blue-700 rounded-2xl p-3 mt-5"
-      >Select {getPlayerNickname(
-        $gameStore.answerInFocus.player,
-        $gameStore.players
-      )}'s answer as the winner</button
+      class="border border-blue-700  bg-white text-blue-700 rounded-2xl p-3 mt-5"
+      >Select <b
+        >{getPlayerNickname(
+          $gameStore.answerInFocus.player,
+          $gameStore.players
+        )}'s
+      </b>answer as the winner</button
     >
   {/if}
 {/if}
