@@ -1,4 +1,4 @@
 /node_modules
 /.env
-
+/dist
 /game-server/node_modules

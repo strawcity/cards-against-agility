@@ -1,11 +1,9 @@
 const { answers, questions } = require("./cards/data.cjs");
-const express = require('express');
-const app = express();
-const httpServer = require('http').Server(app);
-// const http = require("http");
+const http = require("http");
 const websocketServer = require("websocket").server;
-// const httpServer = http.createServer();
+const httpServer = http.createServer();
 httpServer.listen(8080, () => console.log("Listening.. on 8080"));
+
 
 const players = {};
 const games = {};

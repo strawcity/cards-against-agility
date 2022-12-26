@@ -4,7 +4,8 @@
   import { navigate } from "svelte-routing";
   import { websocketStore } from "./stores/websocket-store";
   import Footer from "./views/Footer.svelte";
-  websocketStore.connect("ws://localhost:1999");
+  websocketStore.connect(import.meta.env.VITE_WS_URL);
+
   websocketStore.onmessage((message) => {
     const response = JSON.parse(message.data);
 
