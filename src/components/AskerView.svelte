@@ -6,8 +6,8 @@
     newRound,
     selectWinner,
   } from "../helpers/gameFunctions";
-  import { replaceLine } from "./../helpers/replaceLine";
   import { getPlayerNickname } from "./../helpers/getPlayerNickname";
+  import QuestionCard from "./QuestionCard.svelte";
 
   let players = $gameStore.players.filter(
     (player) => player.playerId !== $playerStore.playerId
@@ -42,24 +42,7 @@
   }
 </script>
 
-<div
-  class={classNames(
-    "mb-12 rounded-2xl shrink-0 border transition-all text-white duration-150 bg-blue-700 w-44 h-56 flex justify-center items-center text-center p-5 shadow-md"
-  )}
->
-  <h3>
-    {#if $gameStore.answerInFocus}
-      {@html replaceLine(
-        $gameStore.questionCard,
-        $gameStore.answerInFocus.answer
-      )}
-    {:else}
-      {@html !!$gameStore.questionCard
-        ? replaceLine($gameStore.questionCard)
-        : null}
-    {/if}
-  </h3>
-</div>
+<QuestionCard />
 
 <div class="flex w-full justify-center flex-wrap gap-4 px-5">
   {#each players as player}

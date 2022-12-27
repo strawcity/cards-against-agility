@@ -4,6 +4,7 @@
   import { submitCard } from "../helpers/gameFunctions";
   import { playerStore, gameStore } from "../stores/game-store";
   import { replaceLine } from "./../helpers/replaceLine";
+  import QuestionCard from "./QuestionCard.svelte";
 
   let hasSubmittedCard;
   let selectedCard;
@@ -36,22 +37,8 @@
 {#if $gameStore.winner}
   {getPlayerNickname($gameStore.winner, $gameStore.players)} won with:
 {/if}
-<div
-  class={classNames(
-    "mb-12 rounded-2xl shrink-0 border transition-all text-white duration-150 bg-blue-700 w-52 h-64 flex justify-center items-center text-center p-5 shadow-md"
-  )}
->
-  <h3>
-    {#if $gameStore.answerInFocus}
-      {@html replaceLine(
-        $gameStore.questionCard,
-        $gameStore.answerInFocus.answer
-      )}
-    {:else}
-      {@html replaceLine($gameStore.questionCard, selectedCard)}
-    {/if}
-  </h3>
-</div>
+
+<QuestionCard {selectedCard} />
 
 {#if hasSubmittedCard && !$gameStore.isInRetro}
   <h3>Waiting for other players</h3>
@@ -65,7 +52,7 @@
         <button
           on:click={() => selectAnswer(card)}
           class={classNames(
-            "rounded-2xl shrink-0 border transition-all bg-white duration-150 text-blue-700 border-blue-700 w-40 h-52 flex justify-center items-center text-center p-5 shadow cursor-pointer",
+            "rounded-2xl font-sans shrink-0 border transition-all bg-white duration-150 text-blue-700 border-blue-700 w-40 h-52 flex justify-center items-center text-center p-5 shadow cursor-pointer",
             {
               "border-4 scale-125 -translate-y-5 shadow-xl":
                 card === selectedCard,
