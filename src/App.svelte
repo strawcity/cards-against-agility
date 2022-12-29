@@ -52,7 +52,7 @@
         $gameStore.answerInFocus = response.inFocusCard;
         break;
 
-      case "show-winner":
+      case "show-round-winner":
         $gameStore.winner = response.winningPlayer;
         $playerStore.wonCards = response.wonCards;
         break;
@@ -64,6 +64,11 @@
         $playerStore.answerCards = response.answerCards;
         $playerStore.isAskingQuestion = response.isAskingQuestion;
         $gameStore.questionCard = response.questionCard;
+        break;
+
+      case "show-game-winner":
+        $gameStore.isGameOver = true;
+        $gameStore.winner = response.winningPlayer;
         break;
 
       case "invalid-game-id":

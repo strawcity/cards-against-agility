@@ -14,6 +14,7 @@ interface GameStore {
   questionCard: string;
   submittedCards: SubmittedCard[];
   isInRetro: boolean;
+  isGameOver: boolean;
   answerInFocus: AnswerInFocus;
   winner: string;
 }
@@ -47,6 +48,7 @@ export const gameStore = writable<GameStore>({
   questionCard: null,
   submittedCards: null,
   isInRetro: false,
+  isGameOver: false,
   answerInFocus: null,
   winner: null,
 });

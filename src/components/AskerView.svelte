@@ -49,7 +49,7 @@
     <button
       on:click={() => ($gameStore.isInRetro ? handleRevealClick(player) : null)}
       class={classNames(
-        "rounded-2xl shrink-0 border transition-all border-dashed duration-150 w-40 h-52 flex justify-center items-center text-center p-5 shadow",
+        "rounded-2xl shrink-0 border font-sans transition-all border-dashed duration-150 w-40 h-52 flex justify-center items-center text-center p-5 shadow",
         {
           "bg-black text-white  border-none ": $gameStore.isInRetro,
           "text-blue-700 border-blue-700 bg-white opacity-40 ":

@@ -49,7 +49,9 @@
   {$gameStore.isInRetro ? "R E T R O S P E C T I V E" : " S P R I N T"}
 </div>
 
-{#if $playerStore.isAskingQuestion}
+{#if $gameStore.isGameOver}
+  <div>Game over</div>
+{:else if $playerStore.isAskingQuestion}
   <AskerView />
 {:else}
   <PlayingCardView />
