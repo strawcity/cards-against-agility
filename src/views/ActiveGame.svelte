@@ -5,7 +5,7 @@
   import PlayingCardView from "./../components/PlayingCardView.svelte";
 </script>
 
-{#if $playerStore.wonCards > 0}
+{#if $playerStore.wonCards > 0 && !$gameStore.winner}
   <div class="w-full h-4 absolute top-20 left-20">
     Points: {$playerStore.wonCards}
   </div>

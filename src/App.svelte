@@ -19,7 +19,7 @@
         $gameStore.players = response.game.players;
         $playerStore.nickname = response.nickname;
         if (response.game.id && response.nickname) {
-          navigate(`/${response.game.id}`);
+          navigate(`lobby/${response.game.id}`);
         }
         break;
 

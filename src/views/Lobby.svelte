@@ -34,7 +34,7 @@
   }
 
   function copyToClipboard() {
-    navigator.clipboard.writeText(`http://localhost:5173/${gameId}`);
+    navigator.clipboard.writeText(document.location.href);
     showCopiedBanner = true;
 
     setTimeout(() => {
@@ -50,7 +50,9 @@
     out:fly={{ y: -64, duration: 500 }}
     class="absolute p-5 top-0 w-full bg-blue-300 flex justify-center items-center"
   >
-    http://localhost:5173/{gameId} successfully copied to clipboard!
+    <p>
+      <strong>{document.location.href}</strong> successfully copied to clipboard!
+    </p>
   </div>
 {/if}
 
@@ -63,7 +65,7 @@
       {/each}
     </div>
     <button
-      class="border w-72 border-blue-300 rounded-2xl p-3 mt-5"
+      class="border border-blue-300 rounded-2xl p-3 mt-5"
       on:click={copyToClipboard}>Share a link with your friend</button
     >
     {#if $gameStore.players.length >= 3}

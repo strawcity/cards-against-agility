@@ -3,10 +3,11 @@
   import { getPlayerNickname } from "./../helpers/getPlayerNickname";
   import { submitCard } from "../helpers/gameFunctions";
   import { playerStore, gameStore } from "../stores/game-store";
-  import { replaceLine } from "./../helpers/replaceLine";
   import QuestionCard from "./QuestionCard.svelte";
 
   let hasSubmittedCard;
+  console.log("🚀 ~ hasSubmittedCard", hasSubmittedCard);
+  console.log("🚀 ~ !$gameStore.isInRetro", !$gameStore.isInRetro);
   let selectedCard;
   let playerId;
 

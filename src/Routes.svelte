@@ -7,7 +7,7 @@
 
 <Router>
   <Route path="/" component={Entrance} />
-  <Route path="/:gameId" let:params>
+  <Route path="/lobby/:gameId" let:params>
     <Lobby gameId={params.gameId} />
   </Route>
   <Route path="/active-game" component={ActiveGame} />
