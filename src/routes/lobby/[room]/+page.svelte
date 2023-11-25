@@ -11,6 +11,9 @@
 	let jobTitle = generateJobTitle();
 	let tempNickname: string;
 	import { page } from '$app/stores';
+	import { PUBLIC_SOCKET_URL } from '$env/static/public';
+	import ioClient from 'socket.io-client';
+	import { setIo } from './../../../stores/socket-store';
 
 	playerStore.subscribe((store) => {
 		const playerStore = store;
@@ -18,8 +21,20 @@
 		nickname = playerStore.nickname;
 	});
 
-	function handleJoinGameClick() {
-		joinGame(tempNickname + ', ' + jobTitle, gameId);
+	async function handleJoinGameClick() {
+		const response = await fetch(`${PUBLIC_SOCKET_URL}/connect`);
+		await response.json().then((data) => {
+			let socket = ioClient(PUBLIC_SOCKET_URL, {
+				auth: {
+					token: data.token
+				}
+			});
+			socket.on('connected', (playerId) => {
+				$playerStore.playerId = playerId;
+				joinGame(tempNickname + ', ' + jobTitle, gameId);
+			});
+			setIo(socket);
+		});
 	}
 	function handleStartGameClick() {
 		startGame(gameId);

@@ -1,6 +1,6 @@
 import { writable } from 'svelte/store';
 
-interface PlayerStore {
+export interface PlayerStore {
 	playerId: string;
 	nickname: string;
 	answerCards: string[];

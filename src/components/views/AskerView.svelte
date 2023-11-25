@@ -16,7 +16,6 @@
 	}
 
 	function addCard(playersArray: Player[], cardsArray: any) {
-		console.log('🚀 ~ addCard ~ cardsArray', cardsArray);
 		for (let i = 0; i < playersArray.length; i++) {
 			for (let j = 0; j < cardsArray.length; j++) {
 				if (playersArray[i].playerId === cardsArray[j].player) {
@@ -65,15 +64,18 @@
 	{#if $gameStore.winner}
 		<button
 			on:click={handleNextRoundClick}
-			class="border  text-white bg-blue-700 rounded-2xl p-3 mt-5">Start next round!</button
+			class="border text-white bg-blue-700 rounded-2xl p-3 mt-5">Start next round!</button
 		>
-	{:else}
+	{:else if $gameStore.isInRetro && getPlayerNickname($gameStore.answerInFocus.player, $gameStore.players !== null)}
 		<button
 			on:click={handleSelectWinnerClick}
-			class="border border-blue-700  bg-white text-blue-700 rounded-2xl p-3 mt-5"
-			>Select <b
+			class="border border-blue-700 bg-white text-blue-700 rounded-2xl p-3 mt-5"
+		>
+			Select <b
 				>{getPlayerNickname($gameStore.answerInFocus.player, $gameStore.players)}'s
 			</b>answer as the winner</button
 		>
+	{:else}
+		Waiting for players
 	{/if}
 {/if}

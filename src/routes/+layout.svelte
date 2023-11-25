@@ -1,17 +1,24 @@
 <script lang="ts">
 	import { io } from './../stores/socket-store';
-	import { onMount } from 'svelte';
+	import { onDestroy } from 'svelte';
 	import Footer from './Footer.svelte';
 	import '../app.css';
 	import { playerStore, gameStore } from './../stores/game-store';
 	import { goto } from '$app/navigation';
+	import type { Socket } from 'socket.io-client';
 
-	onMount(() => {
-		io.on('connected', (playerId) => {
+	let socket: Socket;
+	const unsubscribe = io.subscribe((value) => {
+		socket = value;
+	});
+
+	$: if (socket) {
+		socket.on('connected', (playerId) => {
+			console.log('🚀 ~ socket.on ~ playerId:', playerId);
 			$playerStore.playerId = playerId;
 		});
 
-		io.on('create-game', (response) => {
+		socket.on('create-game', (response) => {
 			$gameStore.id = response.game.id;
 			$gameStore.players = response.game.players;
 			$playerStore.nickname = response.nickname;
@@ -20,14 +27,14 @@
 			}
 		});
 
-		io.on('join-game', (response) => {
+		socket.on('join-game', (response) => {
 			$playerStore.nickname = response.nickname;
 			$gameStore.players = response.game.players;
 			$gameStore.id = response.game.id;
 			$playerStore.nickname = response.nickname;
 		});
 
-		io.on('start-game', (response) => {
+		socket.on('start-game', (response) => {
 			$playerStore.answerCards = response.answerCards;
 			$playerStore.answerCards = response.answerCards;
 			$playerStore.isAskingQuestion = response.isAskingQuestion;
@@ -37,24 +44,24 @@
 			}
 		});
 
-		io.on('receive-answer-card', (response) => {
+		socket.on('receive-answer-card', (response) => {
 			$gameStore.submittedCards = response.submittedCards;
 		});
 
-		io.on('start-card-review', () => {
+		socket.on('start-card-review', () => {
 			$gameStore.isInRetro = true;
 		});
 
-		io.on('show-answer', (response) => {
+		socket.on('show-answer', (response) => {
 			$gameStore.answerInFocus = response.inFocusCard;
 		});
 
-		io.on('show-round-winner', (response) => {
+		socket.on('show-round-winner', (response) => {
 			$gameStore.winner = response.winningPlayer;
 			$playerStore.wonCards = response.wonCards;
 		});
 
-		io.on('new-round', (response) => {
+		socket.on('new-round', (response) => {
 			$gameStore.isInRetro = false;
 			$gameStore.answerInFocus = { player: '', answer: '' };
 			$gameStore.winner = '';
@@ -63,10 +70,13 @@
 			$gameStore.questionCard = response.questionCard;
 		});
 
-		io.on('show-game-winner', (response) => {
+		socket.on('show-game-winner', (response) => {
 			$gameStore.isGameOver = true;
 			$gameStore.winner = response.winningPlayer;
 		});
+	}
+	onDestroy(() => {
+		unsubscribe();
 	});
 </script>
 

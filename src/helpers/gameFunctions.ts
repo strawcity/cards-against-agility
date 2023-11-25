@@ -1,8 +1,14 @@
 import { io } from './../stores/socket-store';
 import { gameStore, playerStore } from './../stores/game-store';
+import type { Socket } from 'socket.io-client';
 
 let playerId: string;
 let storedGameId: string;
+let ioStore: any;
+
+io.subscribe((store: Socket) => {
+	ioStore = store;
+});
 
 playerStore.subscribe((state) => {
 	const playerStore = state;
@@ -14,15 +20,15 @@ gameStore.subscribe((state) => {
 	storedGameId = gameStore.id;
 });
 
-export function createGame(nickname: string) {
-	io.emit('create-game', {
+export function createGame(playerId: string, nickname: string) {
+	ioStore.emit('create-game', {
 		playerId: playerId,
 		nickname: nickname
 	});
 }
 
 export function joinGame(nickname: string, gameId: string) {
-	io.emit('join-game', {
+	ioStore.emit('join-game', {
 		playerId: playerId,
 		nickname: nickname,
 		gameId: gameId
@@ -30,13 +36,13 @@ export function joinGame(nickname: string, gameId: string) {
 }
 
 export function startGame(gameId: string) {
-	io.emit('start-game', {
+	ioStore.emit('start-game', {
 		gameId: gameId
 	});
 }
 
 export function submitCard(playerId: string, submittedCard: string) {
-	io.emit('submit-card', {
+	ioStore.emit('submit-card', {
 		gameId: storedGameId,
 		playerId: playerId,
 		submittedCard: submittedCard
@@ -48,7 +54,7 @@ export function distributeCurrentAnswerInFocus(
 	answeringPlyaer: string,
 	answerInFocus: string
 ) {
-	io.emit('show-current-answer', {
+	ioStore.emit('show-current-answer', {
 		gameId: storedGameId,
 		playerId: answeringPlyaer,
 		answer: answerInFocus
@@ -56,11 +62,11 @@ export function distributeCurrentAnswerInFocus(
 }
 
 export function selectWinner(winningPlayer: string) {
-	io.emit('select-winner', { winningPlayer: winningPlayer, gameId: storedGameId });
+	ioStore.emit('select-winner', { winningPlayer: winningPlayer, gameId: storedGameId });
 }
 
 export function newRound() {
-	io.emit('new-round', { gameId: storedGameId });
+	ioStore.emit('new-round', { gameId: storedGameId });
 }
 
 function randomFromArray(array: string[]) {

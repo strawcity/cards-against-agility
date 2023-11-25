@@ -3,6 +3,9 @@
 	import { createGame, generateJobTitle } from '../helpers/gameFunctions';
 	import classNames from 'classnames';
 	import Header from './Header.svelte';
+	import { PUBLIC_SOCKET_URL } from '$env/static/public';
+	import ioClient from 'socket.io-client';
+	import { io, setIo } from '../stores/socket-store';
 
 	let playerId;
 	let tempNickname: string;
@@ -17,8 +20,20 @@
 		jobTitle = generateJobTitle();
 	}
 
-	function handleSaveNicknameClick() {
-		createGame(tempNickname + ', ' + jobTitle);
+	async function handleSaveNicknameClick() {
+		const response = await fetch(`${PUBLIC_SOCKET_URL}/connect`);
+		await response.json().then((data) => {
+			let socket = ioClient(PUBLIC_SOCKET_URL, {
+				auth: {
+					token: data.token
+				}
+			});
+			setIo(socket);
+			socket.on('connected', (playerId) => {
+				$playerStore.playerId = playerId;
+				createGame(playerId, tempNickname + ', ' + jobTitle);
+			});
+		});
 	}
 </script>
 
