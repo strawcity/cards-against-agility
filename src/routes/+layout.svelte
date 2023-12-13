@@ -3,7 +3,7 @@
 	import { onDestroy } from 'svelte';
 	import Footer from './Footer.svelte';
 	import '../app.css';
-	import { playerStore, gameStore } from './../stores/game-store';
+	import { playerStore, gameStore, type GameStore } from './../stores/game-store';
 	import { goto } from '$app/navigation';
 	import type { Socket } from 'socket.io-client';
 
@@ -18,7 +18,7 @@
 			$playerStore.playerId = playerId;
 		});
 
-		socket.on('create-game', (response) => {
+		socket.on('create-game', (response: { nickname: string; game: GameStore }) => {
 			$gameStore.id = response.game.id;
 			$gameStore.players = response.game.players;
 			$playerStore.nickname = response.nickname;
@@ -27,22 +27,25 @@
 			}
 		});
 
-		socket.on('join-game', (response) => {
+		socket.on('join-game', (response: { nickname: string; game: GameStore }) => {
 			$playerStore.nickname = response.nickname;
 			$gameStore.players = response.game.players;
 			$gameStore.id = response.game.id;
 			$playerStore.nickname = response.nickname;
 		});
 
-		socket.on('start-game', (response) => {
-			$playerStore.answerCards = response.answerCards;
-			$playerStore.answerCards = response.answerCards;
-			$playerStore.isAskingQuestion = response.isAskingQuestion;
-			$gameStore.questionCard = response.questionCard;
-			if ($playerStore.answerCards) {
-				goto('/active-game');
+		socket.on(
+			'start-game',
+			(response: { answerCards: string[]; isAskingQuestion: boolean; questionCard: string }) => {
+				$playerStore.answerCards = response.answerCards;
+				$playerStore.answerCards = response.answerCards;
+				$playerStore.isAskingQuestion = response.isAskingQuestion;
+				$gameStore.questionCard = response.questionCard;
+				if ($playerStore.answerCards) {
+					goto('/active-game');
+				}
 			}
-		});
+		);
 
 		socket.on('receive-answer-card', (response) => {
 			$gameStore.submittedCards = response.submittedCards;
@@ -68,6 +71,7 @@
 			$playerStore.answerCards = response.answerCards;
 			$playerStore.isAskingQuestion = response.isAskingQuestion;
 			$gameStore.questionCard = response.questionCard;
+			$gameStore.submittedCards = [];
 		});
 
 		socket.on('show-game-winner', (response) => {

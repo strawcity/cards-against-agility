@@ -8,7 +8,7 @@ export interface PlayerStore {
 	wonCards: number;
 }
 
-interface GameStore {
+export interface GameStore {
 	id: string;
 	players: Player[];
 	questionCard: string;

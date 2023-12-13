@@ -41,7 +41,7 @@ export function startGame(gameId: string) {
 	});
 }
 
-export function submitCard(playerId: string, submittedCard: string) {
+export function submitCard(playerId: string, submittedCard: string[]) {
 	ioStore.emit('submit-card', {
 		gameId: storedGameId,
 		playerId: playerId,
