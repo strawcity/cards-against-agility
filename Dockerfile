@@ -19,16 +19,20 @@ COPY . .
 # Build the application
 RUN pnpm build
 
-# Compile TypeScript server files that server.js needs (these aren't bundled by SvelteKit)
-RUN mkdir -p build/lib/server && \
-    npx tsc src/lib/server/*.ts \
-    --outDir build/lib/server \
+# Compile TypeScript server files and their dependencies that server.js needs
+# These files aren't bundled by SvelteKit, so we need to compile them separately
+# Using rootDir and outDir to preserve directory structure
+RUN npx tsc src/lib/server/*.ts src/helpers/makeGameId.ts \
+    --outDir build \
+    --rootDir src \
     --module esnext \
     --target es2022 \
     --moduleResolution node \
     --esModuleInterop \
     --skipLibCheck \
-    --resolveJsonModule
+    --resolveJsonModule \
+    --declaration false \
+    --allowSyntheticDefaultImports
 
 # Production stage
 FROM node:22-alpine

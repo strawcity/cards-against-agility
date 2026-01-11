@@ -4,6 +4,11 @@ import { createServer } from 'http';
 import { initializeSocket } from './build/lib/server/socket.js';
 import { setupSocketHandlers } from './build/lib/server/socketHandlers.js';
 
+// Check for required environment variables
+if (!process.env.JWT_SECRET) {
+	console.warn('⚠️  WARNING: JWT_SECRET environment variable is not set. Using default (not secure for production!)');
+}
+
 const app = express();
 const server = createServer(app);
 
