@@ -6,42 +6,47 @@ A multiplayer card game based on Cards Against Humanity, themed around Agile/Scr
 
 ### Prerequisites
 
-- Node.js 18+ (required for Vitest)
-- Yarn package manager
+- Node.js 18+ (required for Vitest and pnpm)
+- pnpm package manager
 
 ### Setup
 
-1. Install dependencies:
+1. Install pnpm (if not already installed):
    ```bash
-   yarn install
+   npm install -g pnpm
    ```
 
-2. Start development server:
+2. Install dependencies:
    ```bash
-   yarn dev
+   pnpm install
    ```
 
-3. Open [http://localhost:5173](http://localhost:5173)
+3. Start development server:
+   ```bash
+   pnpm dev
+   ```
+
+4. Open [http://localhost:5173](http://localhost:5173)
 
 ### Testing
 
 Run tests:
 ```bash
-yarn test          # Run all tests
-yarn test:ui       # Run with UI
-yarn test:coverage # Run with coverage report
+pnpm test          # Run all tests
+pnpm test:ui       # Run with UI
+pnpm test:coverage # Run with coverage report
 ```
 
 ## Building
 
 Build for production:
 ```bash
-yarn build
+pnpm build
 ```
 
 Preview production build:
 ```bash
-yarn preview
+pnpm preview
 ```
 
 ## Deployment
