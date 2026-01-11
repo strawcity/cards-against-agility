@@ -1,6 +1,6 @@
-import type { Player, SubmittedCard } from '../../stores/game-store';
-import { makeGameId } from '../../helpers/makeGameId';
-import { answers, questions } from './cards';
+import type { Player, SubmittedCard } from '../../stores/game-store.js';
+import { makeGameId } from '../../helpers/makeGameId.js';
+import { answers, questions } from './cards.js';
 
 export interface Game {
 	id: string;

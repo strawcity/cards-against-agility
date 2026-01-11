@@ -9,8 +9,8 @@ import {
 	newRound,
 	getPlayerCards,
 	getPlayerScore
-} from './gameState';
-import type { Player } from '../../stores/game-store';
+} from './gameState.js';
+import type { Player } from '../../stores/game-store.js';
 
 export function setupSocketHandlers(io: Server) {
 	io.on('connection', (socket: Socket) => {
