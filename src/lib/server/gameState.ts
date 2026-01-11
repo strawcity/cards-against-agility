@@ -15,6 +15,7 @@ export interface Game {
 	playerCards: Map<string, string[]>; // playerId -> answer cards
 	usedQuestionCards: Set<string>;
 	playerScores: Map<string, number>; // playerId -> score (wonCards)
+	creatorId: string; // playerId of the player who created the game
 }
 
 const games = new Map<string, Game>();
@@ -39,7 +40,8 @@ export function createGame(playerId: string, nickname: string): Game {
 		isGameOver: false,
 		playerCards: new Map(),
 		usedQuestionCards: new Set(),
-		playerScores: new Map()
+		playerScores: new Map(),
+		creatorId: playerId
 	};
 	
 	// Initialize score for creator
@@ -75,9 +77,12 @@ export function getGameByPlayerId(playerId: string): Game | undefined {
 	return games.get(gameId);
 }
 
-export function startGame(gameId: string): Game | null {
+export function startGame(gameId: string, playerId: string): Game | null {
 	const game = games.get(gameId);
 	if (!game || game.players.length < 3) return null;
+	
+	// Only the creator can start the game
+	if (game.creatorId !== playerId) return null;
 
 	// Initialize scores if not already set
 	game.players.forEach((player) => {

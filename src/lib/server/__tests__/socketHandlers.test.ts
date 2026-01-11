@@ -42,7 +42,8 @@ describe('socketHandlers', () => {
 				isGameOver: false,
 				playerCards: new Map(),
 				usedQuestionCards: new Set(),
-				playerScores: new Map()
+				playerScores: new Map(),
+				creatorId: 'player1'
 			} as any);
 
 			setupSocketHandlers(mockServer);
@@ -85,7 +86,8 @@ describe('socketHandlers', () => {
 				isGameOver: false,
 				playerCards: new Map(),
 				usedQuestionCards: new Set(),
-				playerScores: new Map()
+				playerScores: new Map(),
+				creatorId: 'player1'
 			} as any);
 
 			setupSocketHandlers(mockServer);
@@ -126,7 +128,8 @@ describe('socketHandlers', () => {
 				isGameOver: false,
 				playerCards: new Map(),
 				usedQuestionCards: new Set(),
-				playerScores: new Map()
+				playerScores: new Map(),
+				creatorId: 'player1'
 			} as any);
 
 			vi.spyOn(gameState, 'getPlayerCards').mockReturnValue(['card1', 'card2', 'card3']);

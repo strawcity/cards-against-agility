@@ -6,7 +6,8 @@ const config = defineConfig({
 	test: {
 		include: ['src/**/*.{test,spec}.{js,ts}', 'tests/**/*.{test,spec}.{js,ts}'],
 		globals: true,
-		environment: 'node'
+		environment: 'node',
+		setupFiles: ['./tests/setup.ts']
 	}
 });
 

@@ -1,26 +1,10 @@
+import { get } from 'svelte/store';
 import { io } from './../stores/socket-store';
 import { gameStore, playerStore } from './../stores/game-store';
 import type { Socket } from 'socket.io-client';
 
-let playerId: string;
-let storedGameId: string;
-let ioStore: any;
-
-io.subscribe((store: Socket) => {
-	ioStore = store;
-});
-
-playerStore.subscribe((state) => {
-	const playerStore = state;
-	playerId = playerStore.playerId;
-});
-
-gameStore.subscribe((state) => {
-	const gameStore = state;
-	storedGameId = gameStore.id;
-});
-
 export function createGame(playerId: string, nickname: string) {
+	const ioStore = get(io);
 	if (!ioStore) return;
 	ioStore.emit('create-game', {
 		playerId: playerId,
@@ -29,6 +13,8 @@ export function createGame(playerId: string, nickname: string) {
 }
 
 export function joinGame(nickname: string, gameId: string) {
+	const ioStore = get(io);
+	const playerId = get(playerStore).playerId;
 	if (!ioStore || !playerId) return;
 	ioStore.emit('join-game', {
 		playerId: playerId,
@@ -38,13 +24,23 @@ export function joinGame(nickname: string, gameId: string) {
 }
 
 export function startGame(gameId: string) {
-	if (!ioStore) return;
+	const ioStore = get(io);
+	if (!ioStore) {
+		console.error('Socket not connected. Cannot start game.');
+		return;
+	}
+	if (!ioStore.connected) {
+		console.error('Socket not connected. Cannot start game.');
+		return;
+	}
 	ioStore.emit('start-game', {
 		gameId: gameId
 	});
 }
 
 export function submitCard(playerId: string, submittedCard: string) {
+	const ioStore = get(io);
+	const storedGameId = get(gameStore).id;
 	if (!ioStore || !storedGameId) return;
 	ioStore.emit('submit-card', {
 		gameId: storedGameId,
@@ -58,6 +54,8 @@ export function distributeCurrentAnswerInFocus(
 	answeringPlayer: string,
 	answerInFocus: string
 ) {
+	const ioStore = get(io);
+	const storedGameId = get(gameStore).id;
 	if (!ioStore || !storedGameId) return;
 	ioStore.emit('show-current-answer', {
 		gameId: storedGameId,
@@ -67,11 +65,15 @@ export function distributeCurrentAnswerInFocus(
 }
 
 export function selectWinner(winningPlayer: string) {
+	const ioStore = get(io);
+	const storedGameId = get(gameStore).id;
 	if (!ioStore || !storedGameId) return;
 	ioStore.emit('select-winner', { winningPlayer: winningPlayer, gameId: storedGameId });
 }
 
 export function newRound() {
+	const ioStore = get(io);
+	const storedGameId = get(gameStore).id;
 	if (!ioStore || !storedGameId) return;
 	ioStore.emit('new-round', { gameId: storedGameId });
 }

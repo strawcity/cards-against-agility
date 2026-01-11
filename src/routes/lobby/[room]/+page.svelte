@@ -84,7 +84,7 @@
 		<button class="border border-blue-300 rounded-2xl p-3 mt-5" on:click={copyToClipboard}
 			>Share a link with your friend</button
 		>
-		{#if $gameStore.players.length >= 3}
+		{#if $gameStore.players.length >= 3 && $playerStore.playerId === $gameStore.creatorId}
 			<button
 				class="border w-72 bg-blue-700 text-white rounded-2xl p-3 mt-5"
 				on:click|once={handleStartGameClick}>Start game</button

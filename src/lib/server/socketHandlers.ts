@@ -28,7 +28,8 @@ export function setupSocketHandlers(io: Server) {
 				socket.emit('create-game', {
 					game: {
 						id: game.id,
-						players: game.players
+						players: game.players,
+						creatorId: game.creatorId
 					},
 					nickname: data.nickname
 				});
@@ -45,7 +46,8 @@ export function setupSocketHandlers(io: Server) {
 				io.to(data.gameId).emit('join-game', {
 					game: {
 						id: game.id,
-						players: game.players
+						players: game.players,
+						creatorId: game.creatorId
 					},
 					nickname: data.nickname
 				});
@@ -54,7 +56,7 @@ export function setupSocketHandlers(io: Server) {
 
 		// Start game
 		socket.on('start-game', (data: { gameId: string }) => {
-			const game = startGame(data.gameId);
+			const game = startGame(data.gameId, playerId);
 			if (!game) return;
 
 			// Send game state to all players in the game room

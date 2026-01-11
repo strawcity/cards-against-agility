@@ -27,6 +27,7 @@ describe('gameState', () => {
 			expect(game.players[0].playerId).toBe('player1');
 			expect(game.players[0].nickname).toBe('Test Player');
 			expect(game.playerScores.get('player1')).toBe(0);
+			expect(game.creatorId).toBe('player1');
 		});
 
 		it('should initialize game with correct default state', () => {
@@ -71,7 +72,7 @@ describe('gameState', () => {
 			joinGame('player2', 'Player 2', game.id);
 			joinGame('player3', 'Player 3', game.id);
 			
-			const startedGame = startGame(game.id);
+			const startedGame = startGame(game.id, 'player1');
 			expect(startedGame).toBeDefined();
 			
 			const player1Cards = getPlayerCards(game.id, 'player1');
@@ -88,7 +89,7 @@ describe('gameState', () => {
 			joinGame('player2', 'Player 2', game.id);
 			joinGame('player3', 'Player 3', game.id);
 			
-			const startedGame = startGame(game.id);
+			const startedGame = startGame(game.id, 'player1');
 			expect(startedGame?.questionCard).toBeTruthy();
 			expect(startedGame?.questionCard.length).toBeGreaterThan(0);
 		});
@@ -98,7 +99,7 @@ describe('gameState', () => {
 			joinGame('player2', 'Player 2', game.id);
 			joinGame('player3', 'Player 3', game.id);
 			
-			const startedGame = startGame(game.id);
+			const startedGame = startGame(game.id, 'player1');
 			expect(startedGame?.currentAskerIndex).toBeGreaterThanOrEqual(0);
 			expect(startedGame?.currentAskerIndex).toBeLessThan(startedGame!.players.length);
 		});
@@ -107,8 +108,28 @@ describe('gameState', () => {
 			const game = createGame('player1', 'Player 1');
 			joinGame('player2', 'Player 2', game.id);
 			
-			const startedGame = startGame(game.id);
+			const startedGame = startGame(game.id, 'player1');
 			expect(startedGame).toBeNull();
+		});
+
+		it('should only allow the creator to start the game', () => {
+			const game = createGame('player1', 'Player 1');
+			joinGame('player2', 'Player 2', game.id);
+			joinGame('player3', 'Player 3', game.id);
+			
+			// Creator can start
+			const startedGame = startGame(game.id, 'player1');
+			expect(startedGame).toBeDefined();
+			
+			// Reset for next test
+			resetGameState();
+			const game2 = createGame('player1', 'Player 1');
+			joinGame('player2', 'Player 2', game2.id);
+			joinGame('player3', 'Player 3', game2.id);
+			
+			// Non-creator cannot start
+			const startedGame2 = startGame(game2.id, 'player2');
+			expect(startedGame2).toBeNull();
 		});
 
 		it('should initialize scores for all players', () => {
@@ -116,7 +137,7 @@ describe('gameState', () => {
 			joinGame('player2', 'Player 2', game.id);
 			joinGame('player3', 'Player 3', game.id);
 			
-			const startedGame = startGame(game.id);
+			const startedGame = startGame(game.id, 'player1');
 			expect(startedGame?.playerScores.get('player1')).toBe(0);
 			expect(startedGame?.playerScores.get('player2')).toBe(0);
 			expect(startedGame?.playerScores.get('player3')).toBe(0);
@@ -128,7 +149,7 @@ describe('gameState', () => {
 			const game = createGame('player1', 'Player 1');
 			joinGame('player2', 'Player 2', game.id);
 			joinGame('player3', 'Player 3', game.id);
-			startGame(game.id);
+			startGame(game.id, 'player1');
 			
 			const initialCards = getPlayerCards(game.id, 'player2');
 			const cardToSubmit = initialCards[0];
@@ -144,7 +165,7 @@ describe('gameState', () => {
 			const game = createGame('player1', 'Player 1');
 			joinGame('player2', 'Player 2', game.id);
 			joinGame('player3', 'Player 3', game.id);
-			startGame(game.id);
+			startGame(game.id, 'player1');
 			
 			const initialCards = getPlayerCards(game.id, 'player2');
 			const cardToSubmit = initialCards[0];
@@ -166,7 +187,7 @@ describe('gameState', () => {
 			const game = createGame('player1', 'Player 1');
 			joinGame('player2', 'Player 2', game.id);
 			joinGame('player3', 'Player 3', game.id);
-			startGame(game.id);
+			startGame(game.id, 'player1');
 			
 			// Submit cards
 			const player2Cards = getPlayerCards(game.id, 'player2');
@@ -185,7 +206,7 @@ describe('gameState', () => {
 			const game = createGame('player1', 'Player 1');
 			joinGame('player2', 'Player 2', game.id);
 			joinGame('player3', 'Player 3', game.id);
-			startGame(game.id);
+			startGame(game.id, 'player1');
 			
 			// Manually set score to 4
 			game.playerScores.set('player2', 4);
@@ -207,7 +228,7 @@ describe('gameState', () => {
 			const game = createGame('player1', 'Player 1');
 			joinGame('player2', 'Player 2', game.id);
 			joinGame('player3', 'Player 3', game.id);
-			startGame(game.id);
+			startGame(game.id, 'player1');
 			
 			// Submit a card
 			const player2Cards = getPlayerCards(game.id, 'player2');
@@ -225,7 +246,7 @@ describe('gameState', () => {
 			const game = createGame('player1', 'Player 1');
 			joinGame('player2', 'Player 2', game.id);
 			joinGame('player3', 'Player 3', game.id);
-			startGame(game.id);
+			startGame(game.id, 'player1');
 			
 			const firstAskerIndex = game.currentAskerIndex;
 			const newRoundGame = newRound(game.id);
@@ -237,7 +258,7 @@ describe('gameState', () => {
 			const game = createGame('player1', 'Player 1');
 			joinGame('player2', 'Player 2', game.id);
 			joinGame('player3', 'Player 3', game.id);
-			startGame(game.id);
+			startGame(game.id, 'player1');
 			
 			// Submit cards
 			const player2Cards = getPlayerCards(game.id, 'player2');
@@ -253,7 +274,7 @@ describe('gameState', () => {
 			const game = createGame('player1', 'Player 1');
 			joinGame('player2', 'Player 2', game.id);
 			joinGame('player3', 'Player 3', game.id);
-			startGame(game.id);
+			startGame(game.id, 'player1');
 			
 			const firstQuestion = game.questionCard;
 			const newRoundGame = newRound(game.id);
@@ -266,7 +287,7 @@ describe('gameState', () => {
 			const game = createGame('player1', 'Player 1');
 			joinGame('player2', 'Player 2', game.id);
 			joinGame('player3', 'Player 3', game.id);
-			startGame(game.id);
+			startGame(game.id, 'player1');
 			
 			expect(game.roundNumber).toBe(1);
 			const newRoundGame = newRound(game.id);
@@ -298,7 +319,7 @@ describe('gameState', () => {
 			const game = createGame('player1', 'Player 1');
 			joinGame('player2', 'Player 2', game.id);
 			joinGame('player3', 'Player 3', game.id);
-			startGame(game.id);
+			startGame(game.id, 'player1');
 			
 			// Submit cards and select winner
 			const player2Cards = getPlayerCards(game.id, 'player2');

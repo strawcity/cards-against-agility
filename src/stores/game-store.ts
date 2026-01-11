@@ -17,6 +17,7 @@ interface GameStore {
 	isGameOver: boolean;
 	answerInFocus: AnswerInFocus;
 	winner: string;
+	creatorId: string;
 }
 
 export type Player = {
@@ -50,5 +51,6 @@ export const gameStore = writable<GameStore>({
 	isInRetro: false,
 	isGameOver: false,
 	answerInFocus: { player: '', answer: '' },
-	winner: ''
+	winner: '',
+	creatorId: ''
 });

@@ -23,6 +23,7 @@
 		socket.on('create-game', (response) => {
 			$gameStore.id = response.game.id;
 			$gameStore.players = response.game.players;
+			$gameStore.creatorId = response.game.creatorId;
 			$playerStore.nickname = response.nickname;
 			if (response.game.id && response.nickname) {
 				goto(`lobby/${response.game.id}`);
@@ -33,6 +34,7 @@
 			$playerStore.nickname = response.nickname;
 			$gameStore.players = response.game.players;
 			$gameStore.id = response.game.id;
+			$gameStore.creatorId = response.game.creatorId;
 		});
 
 		socket.on('start-game', (response) => {
