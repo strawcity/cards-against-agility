@@ -16,6 +16,9 @@ export function setupSocketHandlers(io: Server) {
 	io.on('connection', (socket: Socket) => {
 		const playerId = socket.data.playerId;
 
+		// Join socket to a room with their playerId so we can send events to specific players
+		socket.join(playerId);
+
 		// Send connected event with playerId
 		socket.emit('connected', playerId);
 

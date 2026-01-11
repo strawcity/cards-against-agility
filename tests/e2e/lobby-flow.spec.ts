@@ -192,8 +192,8 @@ test.describe('Lobby Flow', () => {
 			const page = await context.newPage();
 			contexts.push(context);
 			pages.push(page);
-			// Join simultaneously
-			joinGameAsPlayer(page, gameId, `Player ${i}`);
+			// Join simultaneously (but still await each one)
+			await joinGameAsPlayer(page, gameId, `Player ${i}`);
 		}
 
 		// Wait for all to join

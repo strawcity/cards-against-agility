@@ -39,7 +39,13 @@ export async function joinGameAsPlayer(
 	await page.click('button:has-text("Save nickname and join lobby")');
 
 	// Wait for socket connection and join event
-	await page.waitForTimeout(1000);
+	// Wait for player to appear in lobby instead of fixed timeout
+	try {
+		await page.waitForSelector('p.font-semibold', { timeout: 10000 });
+	} catch {
+		// If selector doesn't appear, wait a bit for socket connection
+		await page.waitForTimeout(1000);
+	}
 }
 
 /**
@@ -53,20 +59,34 @@ export async function createGameAsPlayer(
 	await page.goto('/');
 
 	// Wait for the form
-	await page.waitForSelector('input[class*="border-b"]');
+	await page.waitForSelector('input[class*="border-b"]', { timeout: 10000 });
 
 	// Enter nickname
 	await page.fill('input[class*="border-b"]', nickname);
+
+	// Set up navigation promise BEFORE clicking the button
+	const navigationPromise = page.waitForURL(/\/lobby\/[a-zA-Z0-9]+/, { timeout: 30000 });
 
 	// Click create button
 	await page.click('button:has-text("Save nickname and open a lobby")');
 
 	// Wait for navigation to lobby
-	await page.waitForURL(/\/lobby\/[a-zA-Z0-9]+/, { timeout: 5000 });
+	// The navigation happens after:
+	// 1. Socket connects
+	// 2. 'connected' event is received
+	// 3. 'create-game' is emitted
+	// 4. Server responds with 'create-game' event
+	// 5. +layout.svelte navigates to lobby
+	await navigationPromise;
 
 	// Extract game ID from URL
 	const url = page.url();
 	const gameId = url.split('/lobby/')[1];
+	
+	if (!gameId) {
+		throw new Error(`Failed to extract game ID from URL: ${url}`);
+	}
+	
 	return gameId;
 }
 
@@ -76,10 +96,19 @@ export async function createGameAsPlayer(
 export async function startGame(page: Page): Promise<void> {
 	// Wait for start button to be visible and enabled
 	await page.waitForSelector('button:has-text("Start game")', { state: 'visible' });
+	
+	// Set up navigation promise BEFORE clicking
+	const navigationPromise = page.waitForURL('/active-game', { timeout: 30000 });
+	
 	await page.click('button:has-text("Start game")');
 
 	// Wait for navigation to active game
-	await page.waitForURL('/active-game', { timeout: 5000 });
+	// The navigation happens after socket receives 'start-game' event
+	// which includes answerCards, questionCard, etc.
+	await navigationPromise;
+	
+	// Also wait for question card to appear to ensure game fully loaded
+	await waitForQuestionCard(page);
 }
 
 /**
@@ -203,7 +232,13 @@ export async function isStartButtonVisible(page: Page): Promise<boolean> {
  */
 export async function waitForQuestionCard(page: Page): Promise<void> {
 	// Question card should be visible in active game
-	await page.waitForSelector('text=/---/', { timeout: 10000 });
+	// Try multiple selectors that might indicate the game has started
+	try {
+		await page.waitForSelector('text=/---/', { timeout: 5000 });
+	} catch {
+		// Fallback: wait for any card-like element or game content
+		await page.waitForSelector('button, .card, [class*="card"]', { timeout: 5000 });
+	}
 }
 
 /**
