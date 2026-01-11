@@ -3,13 +3,19 @@
 	import { createGame, generateJobTitle } from '../helpers/gameFunctions';
 	import classNames from 'classnames';
 	import Header from './Header.svelte';
-	import { PUBLIC_SOCKET_URL } from '$env/static/public';
 	import ioClient from 'socket.io-client';
-	import { io, setIo } from '../stores/socket-store';
+	import { setIo } from '../stores/socket-store';
+	import { onMount } from 'svelte';
 
 	let playerId;
 	let tempNickname: string;
-	let jobTitle = generateJobTitle();
+	let jobTitle = '';
+
+	onMount(() => {
+		if (!jobTitle) {
+			jobTitle = generateJobTitle();
+		}
+	});
 
 	playerStore.subscribe((store) => {
 		const playerStore = store;
@@ -21,9 +27,9 @@
 	}
 
 	async function handleSaveNicknameClick() {
-		const response = await fetch(`${PUBLIC_SOCKET_URL}/connect`);
+		const response = await fetch('/api/connect');
 		await response.json().then((data) => {
-			let socket = ioClient(PUBLIC_SOCKET_URL, {
+			let socket = ioClient(window.location.origin, {
 				auth: {
 					token: data.token
 				}
@@ -47,12 +53,14 @@
 				</div>
 			</label>
 		</form>
-		{jobTitle}
+		<div class="h-4 transition-opacity duration-500 {jobTitle ? 'opacity-100' : 'opacity-0'}">
+			{jobTitle}
+		</div>
 	</div>
 
 	<div>
 		<button class="border border-blue-300 rounded-2xl p-3" on:click|preventDefault={getNewJobTitle}
-			>Generate new job title
+			>Generate job title
 		</button>
 	</div>
 	<button

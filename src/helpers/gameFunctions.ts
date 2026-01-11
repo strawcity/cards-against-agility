@@ -21,6 +21,7 @@ gameStore.subscribe((state) => {
 });
 
 export function createGame(playerId: string, nickname: string) {
+	if (!ioStore) return;
 	ioStore.emit('create-game', {
 		playerId: playerId,
 		nickname: nickname
@@ -28,6 +29,7 @@ export function createGame(playerId: string, nickname: string) {
 }
 
 export function joinGame(nickname: string, gameId: string) {
+	if (!ioStore || !playerId) return;
 	ioStore.emit('join-game', {
 		playerId: playerId,
 		nickname: nickname,
@@ -36,12 +38,14 @@ export function joinGame(nickname: string, gameId: string) {
 }
 
 export function startGame(gameId: string) {
+	if (!ioStore) return;
 	ioStore.emit('start-game', {
 		gameId: gameId
 	});
 }
 
 export function submitCard(playerId: string, submittedCard: string) {
+	if (!ioStore || !storedGameId) return;
 	ioStore.emit('submit-card', {
 		gameId: storedGameId,
 		playerId: playerId,
@@ -51,21 +55,24 @@ export function submitCard(playerId: string, submittedCard: string) {
 
 export function distributeCurrentAnswerInFocus(
 	/* This function takes the current answering-player-in-focus's ID and the completed answer string with <b></b> tags and sends this information to everyone */
-	answeringPlyaer: string,
+	answeringPlayer: string,
 	answerInFocus: string
 ) {
+	if (!ioStore || !storedGameId) return;
 	ioStore.emit('show-current-answer', {
 		gameId: storedGameId,
-		playerId: answeringPlyaer,
+		playerId: answeringPlayer,
 		answer: answerInFocus
 	});
 }
 
 export function selectWinner(winningPlayer: string) {
+	if (!ioStore || !storedGameId) return;
 	ioStore.emit('select-winner', { winningPlayer: winningPlayer, gameId: storedGameId });
 }
 
 export function newRound() {
+	if (!ioStore || !storedGameId) return;
 	ioStore.emit('new-round', { gameId: storedGameId });
 }
 

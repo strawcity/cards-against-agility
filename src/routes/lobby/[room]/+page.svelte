@@ -8,12 +8,19 @@
 	let playerId;
 	let nickname;
 	let showCopiedBanner = false;
-	let jobTitle = generateJobTitle();
+	let jobTitle = '';
+
+	onMount(() => {
+		if (!jobTitle) {
+			jobTitle = generateJobTitle();
+		}
+	});
+
 	let tempNickname: string;
 	import { page } from '$app/stores';
-	import { PUBLIC_SOCKET_URL } from '$env/static/public';
 	import ioClient from 'socket.io-client';
 	import { setIo } from './../../../stores/socket-store';
+	import { onMount } from 'svelte';
 
 	playerStore.subscribe((store) => {
 		const playerStore = store;
@@ -22,9 +29,9 @@
 	});
 
 	async function handleJoinGameClick() {
-		const response = await fetch(`${PUBLIC_SOCKET_URL}/connect`);
+		const response = await fetch('/api/connect');
 		await response.json().then((data) => {
-			let socket = ioClient(PUBLIC_SOCKET_URL, {
+			let socket = ioClient(window.location.origin, {
 				auth: {
 					token: data.token
 				}
@@ -96,7 +103,9 @@
 					</div>
 				</label>
 			</form>
-			{jobTitle}
+			<div class="h-4 transition-opacity duration-500 {jobTitle ? 'opacity-100' : 'opacity-0'}">
+				{jobTitle}
+			</div>
 		</div>
 
 		<div>

@@ -13,27 +13,29 @@
 </div>
 
 <div
-	style="left:calc(50vw + -32px)"
 	class={classNames(
-		'absolute p-5 w-full rotate-90 -16 text-white flex justify-center items-center',
+		'absolute p-5 h-screen w-16 right-0 whitespace-nowrap text-white flex justify-center items-center',
 		{
 			'bg-blue-700': $gameStore.isInRetro,
 			'bg-black': !$gameStore.isInRetro
 		}
 	)}
 >
-	{$gameStore.isInRetro ? 'R E T R O S P E C T I V E' : ' S P R I N T'}
+	<div class="rotate-90">
+		{$gameStore.isInRetro ? 'R E T R O S P E C T I V E' : ' S P R I N T'}
+	</div>
 </div>
 
 <div
-	style="right:calc(50vw + -32px)"
 	class={classNames(
-		'absolute p-5 w-full -rotate-90 -16 text-white flex justify-center items-center',
+		'absolute p-5 h-screen w-16 left-0 whitespace-nowrap text-white flex justify-center items-center',
 		{
 			'bg-blue-700': $gameStore.isInRetro,
 			'bg-black': !$gameStore.isInRetro
 		}
 	)}
 >
-	{$gameStore.isInRetro ? 'R E T R O S P E C T I V E' : ' S P R I N T'}
+	<div class="-rotate-90">
+		{$gameStore.isInRetro ? 'R E T R O S P E C T I V E' : ' S P R I N T'}
+	</div>
 </div>

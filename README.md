@@ -1,38 +1,125 @@
-# create-svelte
+# Cards Against Agility
 
-Everything you need to build a Svelte project, powered by [`create-svelte`](https://github.com/sveltejs/kit/tree/master/packages/create-svelte).
+A multiplayer card game based on Cards Against Humanity, themed around Agile/Scrum development practices. Built with SvelteKit and Socket.io.
 
-## Creating a project
+## Development
 
-If you're seeing this, you've probably already done this step. Congrats!
+### Prerequisites
 
+- Node.js 18+ (required for Vitest)
+- Yarn package manager
+
+### Setup
+
+1. Install dependencies:
+   ```bash
+   yarn install
+   ```
+
+2. Start development server:
+   ```bash
+   yarn dev
+   ```
+
+3. Open [http://localhost:5173](http://localhost:5173)
+
+### Testing
+
+Run tests:
 ```bash
-# create a new project in the current directory
-npm create svelte@latest
-
-# create a new project in my-app
-npm create svelte@latest my-app
-```
-
-## Developing
-
-Once you've created a project and installed dependencies with `npm install` (or `pnpm install` or `yarn`), start a development server:
-
-```bash
-npm run dev
-
-# or start the server and open the app in a new browser tab
-npm run dev -- --open
+yarn test          # Run all tests
+yarn test:ui       # Run with UI
+yarn test:coverage # Run with coverage report
 ```
 
 ## Building
 
-To create a production version of your app:
-
+Build for production:
 ```bash
-npm run build
+yarn build
 ```
 
-You can preview the production build with `npm run preview`.
+Preview production build:
+```bash
+yarn preview
+```
 
-> To deploy your app, you may need to install an [adapter](https://kit.svelte.dev/docs/adapters) for your target environment.
+## Deployment
+
+### Fly.io Deployment
+
+This application is configured for deployment on [Fly.io](https://fly.io).
+
+#### Prerequisites
+
+1. Install Fly CLI:
+   ```bash
+   brew install flyctl
+   # or see https://fly.io/docs/getting-started/installing-flyctl/
+   ```
+
+2. Login to Fly.io:
+   ```bash
+   fly auth login
+   ```
+
+#### Initial Setup
+
+1. Connect your repository to Fly.io (via Fly.io dashboard)
+
+2. Launch the app (this will create/update `fly.toml`):
+   ```bash
+   fly launch
+   ```
+   - Choose an app name
+   - Select a region (e.g., `arn` for Stockholm)
+   - Don't deploy yet if prompted
+
+3. Set environment variables:
+   ```bash
+   fly secrets set JWT_SECRET=your-secret-key-here
+   ```
+   Generate a strong secret key for production!
+
+4. Deploy:
+   ```bash
+   fly deploy
+   ```
+
+#### Monitoring
+
+- View logs: `fly logs`
+- Check status: `fly status`
+- Open app: `fly open`
+
+#### Configuration
+
+The `fly.toml` file contains:
+- Resource allocation: 256MB RAM, 1 shared CPU
+- Health check endpoint: `/api/health`
+- HTTP service on port 3000
+
+To adjust resources:
+```bash
+fly scale vm shared-cpu-1x --memory 512
+```
+
+## Environment Variables
+
+- `JWT_SECRET` - Secret key for JWT token generation (required)
+- `PORT` - Server port (defaults to 3000, auto-set by Fly.io)
+
+## Project Structure
+
+- `src/lib/server/` - Server-side code (game state, Socket.io handlers)
+- `src/routes/` - SvelteKit routes and API endpoints
+- `src/components/` - Svelte components
+- `src/stores/` - Svelte stores for state management
+- `server.js` - Server entry point (Socket.io + SvelteKit)
+
+## Tech Stack
+
+- **Frontend**: SvelteKit, TailwindCSS
+- **Backend**: SvelteKit (API routes), Socket.io
+- **Testing**: Vitest
+- **Deployment**: Fly.io

@@ -22,12 +22,12 @@ interface GameStore {
 export type Player = {
 	playerId: string;
 	nickname: string;
-	card?: string;
+	roundCards?: string[];
 };
 
 export type SubmittedCard = {
 	playerId: string;
-	card: string;
+	cards: string[];
 };
 type AnswerInFocus = {
 	player: string;

@@ -8,13 +8,15 @@
 	import type { Socket } from 'socket.io-client';
 
 	let socket: Socket;
+	let handlersRegistered = false;
 	const unsubscribe = io.subscribe((value) => {
 		socket = value;
 	});
 
-	$: if (socket) {
+	$: if (socket && !handlersRegistered) {
+		handlersRegistered = true;
+
 		socket.on('connected', (playerId) => {
-			console.log('🚀 ~ socket.on ~ playerId:', playerId);
 			$playerStore.playerId = playerId;
 		});
 
@@ -31,11 +33,9 @@
 			$playerStore.nickname = response.nickname;
 			$gameStore.players = response.game.players;
 			$gameStore.id = response.game.id;
-			$playerStore.nickname = response.nickname;
 		});
 
 		socket.on('start-game', (response) => {
-			$playerStore.answerCards = response.answerCards;
 			$playerStore.answerCards = response.answerCards;
 			$playerStore.isAskingQuestion = response.isAskingQuestion;
 			$gameStore.questionCard = response.questionCard;
@@ -65,6 +65,7 @@
 			$gameStore.isInRetro = false;
 			$gameStore.answerInFocus = { player: '', answer: '' };
 			$gameStore.winner = '';
+			$gameStore.submittedCards = [];
 			$playerStore.answerCards = response.answerCards;
 			$playerStore.isAskingQuestion = response.isAskingQuestion;
 			$gameStore.questionCard = response.questionCard;
@@ -75,7 +76,11 @@
 			$gameStore.winner = response.winningPlayer;
 		});
 	}
+
 	onDestroy(() => {
+		if (socket) {
+			socket.removeAllListeners();
+		}
 		unsubscribe();
 	});
 </script>

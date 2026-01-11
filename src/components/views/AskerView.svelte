@@ -1,5 +1,5 @@
 <script lang="ts">
-	import { gameStore, playerStore, type Player } from '../../stores/game-store';
+	import { gameStore, playerStore, type Player, type SubmittedCard } from '../../stores/game-store';
 	import classNames from 'classnames';
 	import {
 		distributeCurrentAnswerInFocus,
@@ -9,25 +9,32 @@
 	import { getPlayerNickname } from './../../helpers/getPlayerNickname';
 	import QuestionCard from './../QuestionCard.svelte';
 
-	let players = $gameStore.players.filter((player) => player.playerId !== $playerStore.playerId);
+	$: playersWithCards = addAnswerCardsToPlayers(
+		$gameStore.players.filter((player) => player.playerId !== $playerStore.playerId),
+		$gameStore.submittedCards || []
+	);
 
-	$: if ($gameStore.submittedCards?.length > 0) {
-		players = addCard(players, $gameStore.submittedCards);
-	}
+	function addAnswerCardsToPlayers(players: Player[], submittedCards: SubmittedCard[]): Player[] {
+		const updatedPlayers = players.map((player) => ({ ...player }));
 
-	function addCard(playersArray: Player[], cardsArray: any) {
-		for (let i = 0; i < playersArray.length; i++) {
-			for (let j = 0; j < cardsArray.length; j++) {
-				if (playersArray[i].playerId === cardsArray[j].player) {
-					playersArray[i].card = cardsArray[j].card;
-				}
+		submittedCards.forEach((submittedCard) => {
+			const playerIndex = updatedPlayers.findIndex(
+				(player) => player.playerId === submittedCard.playerId
+			);
+
+			if (playerIndex !== -1) {
+				updatedPlayers[playerIndex] = {
+					...updatedPlayers[playerIndex],
+					roundCards: submittedCard.cards
+				};
 			}
-		}
-		return playersArray;
+		});
+
+		return updatedPlayers;
 	}
 
 	function handleRevealClick(player: Player) {
-		distributeCurrentAnswerInFocus(player.playerId, player.card || '');
+		distributeCurrentAnswerInFocus(player.playerId, player?.roundCards?.[0] || '');
 	}
 
 	function handleSelectWinnerClick() {
@@ -42,16 +49,17 @@
 <QuestionCard />
 
 <div class="flex w-full justify-center flex-wrap gap-4 px-5">
-	{#each players as player}
+	{#each playersWithCards as player}
 		<button
 			on:click={() => ($gameStore.isInRetro ? handleRevealClick(player) : null)}
 			class={classNames(
 				'rounded-2xl shrink-0 border font-sans transition-all border-dashed duration-150 w-40 h-52 flex justify-center items-center text-center p-5 shadow',
 				{
-					'bg-black text-white  border-none ': player.card,
-					'text-blue-700 border-blue-700 bg-white opacity-40 ': !player.card,
+					'bg-black text-white border-none':
+						player.roundCards?.[0] === $gameStore.answerInFocus.answer,
+					'text-blue-700 border-blue-700 bg-white opacity-40': !!player.roundCards,
 					'cursor-pointer': $gameStore.isInRetro,
-					'opacity-40': player.card !== $gameStore?.answerInFocus?.answer
+					'opacity-40': player.roundCards?.[0] !== $gameStore.answerInFocus.answer
 				}
 			)}
 		>
@@ -66,9 +74,9 @@
 			on:click={handleNextRoundClick}
 			class="border text-white bg-blue-700 rounded-2xl p-3 mt-5">Start next round!</button
 		>
-	{:else if $gameStore.isInRetro && getPlayerNickname($gameStore.answerInFocus.player, $gameStore.players !== null)}
+	{:else if $gameStore.isInRetro}
 		<button
-			on:click={handleSelectWinnerClick}
+			on:click={$gameStore.answerInFocus.answer ? handleSelectWinnerClick : null}
 			class="border border-blue-700 bg-white text-blue-700 rounded-2xl p-3 mt-5"
 		>
 			Select <b
