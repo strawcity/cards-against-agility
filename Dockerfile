@@ -19,6 +19,17 @@ COPY . .
 # Build the application
 RUN pnpm build
 
+# Compile TypeScript server files that server.js needs (these aren't bundled by SvelteKit)
+RUN mkdir -p build/lib/server && \
+    npx tsc src/lib/server/*.ts \
+    --outDir build/lib/server \
+    --module esnext \
+    --target es2022 \
+    --moduleResolution node \
+    --esModuleInterop \
+    --skipLibCheck \
+    --resolveJsonModule
+
 # Production stage
 FROM node:22-alpine
 
