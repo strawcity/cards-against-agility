@@ -1,0 +1,14 @@
+---
+description: Never use cd in terminal commands; use working_directory instead
+alwaysApply: true
+---
+
+# Terminal commands: do not use `cd`
+
+When running terminal commands in this project:
+
+- **Never** put `cd` (or `chdir`) in the command. The workspace is already the project root.
+- **Always** use the tool’s `working_directory` parameter set to the project path (e.g. the workspace root) so the command runs in the right place without changing directory in the command itself.
+
+**Bad:** `cd /path/to/project && pnpm test:e2e`  
+**Good:** Command: `pnpm test:e2e` with `working_directory` set to the project path.

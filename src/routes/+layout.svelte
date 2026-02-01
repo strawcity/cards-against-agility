@@ -41,7 +41,8 @@
 			$playerStore.answerCards = response.answerCards;
 			$playerStore.isAskingQuestion = response.isAskingQuestion;
 			$gameStore.questionCard = response.questionCard;
-			if ($playerStore.answerCards) {
+			if ($playerStore.answerCards && $gameStore.id) {
+				socket.emit('join-game-room', $gameStore.id);
 				goto('/active-game');
 			}
 		});
@@ -50,8 +51,8 @@
 			$gameStore.submittedCards = response.submittedCards;
 		});
 
-		socket.on('start-card-review', () => {
-			$gameStore.isInRetro = true;
+		socket.on('start-card-review', (response) => {
+			$gameStore.isInRetro = response?.isInRetro ?? true;
 		});
 
 		socket.on('show-answer', (response) => {
@@ -64,18 +65,21 @@
 		});
 
 		socket.on('new-round', (response) => {
-			$gameStore.isInRetro = false;
+			$gameStore.isInRetro = response?.isInRetro ?? false;
+			$gameStore.submittedCards = response?.submittedCards ?? [];
+			$gameStore.winner = response?.winner ?? '';
 			$gameStore.answerInFocus = { player: '', answer: '' };
-			$gameStore.winner = '';
-			$gameStore.submittedCards = [];
-			$playerStore.answerCards = response.answerCards;
-			$playerStore.isAskingQuestion = response.isAskingQuestion;
-			$gameStore.questionCard = response.questionCard;
+			$playerStore.answerCards = response?.answerCards ?? [];
+			$playerStore.isAskingQuestion = response?.isAskingQuestion ?? false;
+			$gameStore.questionCard = response?.questionCard ?? '';
 		});
 
 		socket.on('show-game-winner', (response) => {
-			$gameStore.isGameOver = true;
-			$gameStore.winner = response.winningPlayer;
+			$gameStore.isGameOver = response?.isGameOver ?? true;
+			$gameStore.winner = response?.winningPlayer ?? '';
+			if (response?.wonCards !== undefined) {
+				$playerStore.wonCards = response.wonCards;
+			}
 		});
 	}
 

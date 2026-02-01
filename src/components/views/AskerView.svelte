@@ -9,6 +9,9 @@
 	import { getPlayerNickname } from './../../helpers/getPlayerNickname';
 	import QuestionCard from './../QuestionCard.svelte';
 
+	// Show winner announcement similar to PlayingCardView
+	$: showWinnerAnnouncement = $gameStore.winner && !$gameStore.isGameOver;
+
 	$: playersWithCards = addAnswerCardsToPlayers(
 		$gameStore.players.filter((player) => player.playerId !== $playerStore.playerId),
 		$gameStore.submittedCards || []
@@ -46,6 +49,11 @@
 	}
 </script>
 
+<!-- Show winner announcement if winner is set -->
+{#if showWinnerAnnouncement}
+	{getPlayerNickname($gameStore.winner, $gameStore.players)} won with:
+{/if}
+
 <QuestionCard />
 
 <div class="flex w-full justify-center flex-wrap gap-4 px-5">
@@ -76,12 +84,13 @@
 		>
 	{:else if $gameStore.isInRetro}
 		<button
-			on:click={$gameStore.answerInFocus.answer ? handleSelectWinnerClick : null}
-			class="border border-blue-700 bg-white text-blue-700 rounded-2xl p-3 mt-5"
+			on:click={handleSelectWinnerClick}
+			disabled={!$gameStore.answerInFocus.answer}
+			class="border border-blue-700 bg-white text-blue-700 rounded-2xl p-3 mt-5 disabled:opacity-50 disabled:cursor-not-allowed"
 		>
 			Select <b
 				>{getPlayerNickname($gameStore.answerInFocus.player, $gameStore.players)}'s
-			</b>answer as the winner</button
+			</b> answer as the winner</button
 		>
 	{:else}
 		Waiting for players

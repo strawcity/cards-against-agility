@@ -57,8 +57,8 @@ describe('Store Integration Tests', () => {
 			}));
 		});
 
-		socket.on('start-card-review', () => {
-			gameStore.update((store) => ({ ...store, isInRetro: true }));
+		socket.on('start-card-review', (response: any) => {
+			gameStore.update((store) => ({ ...store, isInRetro: response.isInRetro }));
 		});
 
 		socket.on('show-answer', (response: any) => {
@@ -76,10 +76,10 @@ describe('Store Integration Tests', () => {
 		socket.on('new-round', (response: any) => {
 			gameStore.update((store) => ({
 				...store,
-				isInRetro: false,
+				isInRetro: response.isInRetro,
+				submittedCards: response.submittedCards ?? [],
+				winner: response.winner ?? '',
 				answerInFocus: { player: '', answer: '' },
-				winner: '',
-				submittedCards: [],
 				questionCard: response.questionCard
 			}));
 			playerStore.update((store) => ({
@@ -92,7 +92,7 @@ describe('Store Integration Tests', () => {
 		socket.on('show-game-winner', (response: any) => {
 			gameStore.update((store) => ({
 				...store,
-				isGameOver: true,
+				isGameOver: response.isGameOver,
 				winner: response.winningPlayer
 			}));
 		});
@@ -200,7 +200,7 @@ describe('Store Integration Tests', () => {
 		});
 
 		it('should update gameStore on start-card-review event', async () => {
-			mockSocket.simulateEvent('start-card-review');
+			mockSocket.simulateEvent('start-card-review', { isInRetro: true });
 
 			await waitForGameStore((store) => store.isInRetro === true);
 
@@ -237,7 +237,8 @@ describe('Store Integration Tests', () => {
 
 		it('should update gameStore on show-game-winner event', async () => {
 			mockSocket.simulateEvent('show-game-winner', {
-				winningPlayer: 'player2'
+				winningPlayer: 'player2',
+				isGameOver: true
 			});
 
 			await waitForGameStore((store) => store.isGameOver === true);
@@ -264,7 +265,10 @@ describe('Store Integration Tests', () => {
 			mockSocket.simulateEvent('new-round', {
 				answerCards: ['new-card1', 'new-card2'],
 				isAskingQuestion: false,
-				questionCard: 'New question ---'
+				questionCard: 'New question ---',
+				isInRetro: false,
+				submittedCards: [],
+				winner: ''
 			});
 
 			await waitForGameStore((store) => store.isInRetro === false);
@@ -325,7 +329,10 @@ describe('Store Integration Tests', () => {
 			mockSocket.simulateEvent('new-round', {
 				answerCards: ['new-card1', 'new-card2', 'new-card3'],
 				isAskingQuestion: true,
-				questionCard: 'New question ---'
+				questionCard: 'New question ---',
+				isInRetro: false,
+				submittedCards: [],
+				winner: ''
 			});
 
 			await waitForPlayerStore((store) => store.answerCards.length === 3);

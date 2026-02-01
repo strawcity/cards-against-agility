@@ -95,7 +95,7 @@ export function setupSocketHandlers(io: Server) {
 			if (allSubmitted && nonAskerPlayers.length > 0) {
 				// Start review phase
 				game.isInRetro = true;
-				io.to(data.gameId).emit('start-card-review');
+				io.to(data.gameId).emit('start-card-review', { isInRetro: true });
 			}
 		});
 
@@ -120,19 +120,24 @@ export function setupSocketHandlers(io: Server) {
 			const game = selectWinner(data.gameId, data.winningPlayer);
 			if (!game) return;
 
-			// Broadcast winner to all players with updated scores
-			game.players.forEach((player) => {
-				const playerScore = getPlayerScore(data.gameId, player.playerId);
-				io.to(player.playerId).emit('show-round-winner', {
-					winningPlayer: data.winningPlayer,
-					wonCards: playerScore
-				});
-			});
-
-			// Check if game should end
 			if (game.isGameOver) {
-				io.to(data.gameId).emit('show-game-winner', {
-					winningPlayer: data.winningPlayer
+				// Game ends this round – emit only show-game-winner (skip round-winner; no "won with:" UI)
+				game.players.forEach((player) => {
+					const playerScore = getPlayerScore(data.gameId, player.playerId);
+					io.to(player.playerId).emit('show-game-winner', {
+						winningPlayer: data.winningPlayer,
+						isGameOver: true,
+						wonCards: playerScore
+					});
+				});
+			} else {
+				// Round ends, game continues – emit round winner with scores
+				game.players.forEach((player) => {
+					const playerScore = getPlayerScore(data.gameId, player.playerId);
+					io.to(player.playerId).emit('show-round-winner', {
+						winningPlayer: data.winningPlayer,
+						wonCards: playerScore
+					});
 				});
 			}
 		});
@@ -142,7 +147,7 @@ export function setupSocketHandlers(io: Server) {
 			const game = newRound(data.gameId);
 			if (!game) return;
 
-			// Send new round data to all players
+			// Send new round data to all players (round-state from server so client does not hardcode)
 			game.players.forEach((player) => {
 				const answerCards = getPlayerCards(data.gameId, player.playerId);
 				const isAskingQuestion = player.playerId === game.players[game.currentAskerIndex].playerId;
@@ -150,7 +155,10 @@ export function setupSocketHandlers(io: Server) {
 				io.to(player.playerId).emit('new-round', {
 					answerCards,
 					isAskingQuestion,
-					questionCard: game.questionCard
+					questionCard: game.questionCard,
+					isInRetro: game.isInRetro,
+					submittedCards: game.submittedCards,
+					winner: game.winner ?? ''
 				});
 			});
 		});

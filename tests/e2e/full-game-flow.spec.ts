@@ -4,18 +4,24 @@ import {
 	joinGameAsPlayer,
 	startGame,
 	submitCard,
-	revealCard,
-	selectWinner,
 	startNextRound,
 	waitForQuestionCard,
 	getPlayerScore,
 	waitForPlayersInLobby,
-	waitForGameOver
+	waitForGameOver,
+	isPlayerAsker,
+	waitForReviewPhase,
+	waitForNewRound,
+	waitForCardSubmission,
+	isGameOver,
+	completeRoundAsAsker
 } from '../helpers/e2e-helpers';
 
 test.describe('Full Game Flow', () => {
+	// Phase 1: Lobby → start game; Phase 2–6: play until 5 points (GAME_PHASES.md)
 	test('should complete a full game from lobby to end', async ({ browser }) => {
-		// Setup: Create game with 3 players
+		test.setTimeout(90000); // 1.5 min – multiple rounds until 5 points (was 4 min; reduced after PlayingCardView submission fix)
+		// Phase 1: Create game and join 3 players
 		const context1 = await browser.newContext();
 		const page1 = await context1.newPage();
 		const gameId = await createGameAsPlayer(page1, 'Player 1');
@@ -41,7 +47,7 @@ test.describe('Full Game Flow', () => {
 		await page2.waitForURL(/\/active-game/, { timeout: 10000 });
 		await page3.waitForURL(/\/active-game/, { timeout: 10000 });
 
-		// Play rounds until someone reaches 5 points
+		// Play rounds until someone reaches 5 points (GAME_PHASES.md Phase 2–6)
 		let gameEnded = false;
 		let roundCount = 0;
 		const maxRounds = 20; // Safety limit
@@ -49,83 +55,102 @@ test.describe('Full Game Flow', () => {
 		while (!gameEnded && roundCount < maxRounds) {
 			roundCount++;
 
-			// Wait for question card
+			// Phase 2: Submission – wait for question card on all pages
 			await waitForQuestionCard(page1);
 			await waitForQuestionCard(page2);
 			await waitForQuestionCard(page3);
 
-			// Wait for cards to be available
-			await page2.waitForSelector('button:has-text("Submit card")', { timeout: 10000 }).catch(() => {});
-			await page3.waitForSelector('button:has-text("Submit card")', { timeout: 10000 }).catch(() => {});
+			// Determine who is the asker (only asker sees "Start next round!" etc.)
+			const page1IsAsker = await isPlayerAsker(page1);
+			const page2IsAsker = await isPlayerAsker(page2);
+			const page3IsAsker = await isPlayerAsker(page3);
+			const askerPage = page1IsAsker ? page1 : page2IsAsker ? page2 : page3;
 
-			// Check if we're in a round (not game over)
-			const isGameOver = await page1.locator('text=/Game over/i').isVisible({ timeout: 1000 }).catch(() => false);
-			if (isGameOver) {
-				gameEnded = true;
-				break;
-			}
-
-			// Submit cards (non-askers)
-			// Determine who is the asker by checking if they see "Waiting for players"
-			const page1IsAsker = await page1.locator('text=/Waiting for players/i').isVisible({ timeout: 2000 }).catch(() => false);
-			const page2IsAsker = await page2.locator('text=/Waiting for players/i').isVisible({ timeout: 2000 }).catch(() => false);
-			const page3IsAsker = await page3.locator('text=/Waiting for players/i').isVisible({ timeout: 2000 }).catch(() => false);
-
+			// Submit cards for ALL non-askers (all must submit for review phase to start)
+			// Game over only occurs after winner selection (Phase 5), not before submissions
 			if (!page1IsAsker) {
-				await submitCard(page1, 0);
+				try {
+					await page1.waitForSelector('button:has-text("Submit card")', { timeout: 10000 });
+					await submitCard(page1, 0);
+					await waitForCardSubmission(page1);
+				} catch (e: any) {
+					// If game ended during submission, that's fine
+					if (e.message?.includes('Target page') || e.message?.includes('closed')) {
+						const gameOverCheck = await isGameOver(page1).catch(() => false);
+						if (gameOverCheck) {
+							gameEnded = true;
+							break;
+						}
+					}
+				}
 			}
 			if (!page2IsAsker) {
-				await submitCard(page2, 0);
+				try {
+					await page2.waitForSelector('button:has-text("Submit card")', { timeout: 10000 });
+					await submitCard(page2, 0);
+					await waitForCardSubmission(page2);
+				} catch (e: any) {
+					// If game ended during submission, that's fine
+					if (e.message?.includes('Target page') || e.message?.includes('closed')) {
+						const gameOverCheck = await isGameOver(page2).catch(() => false);
+						if (gameOverCheck) {
+							gameEnded = true;
+							break;
+						}
+					}
+				}
 			}
 			if (!page3IsAsker) {
-				await submitCard(page3, 0);
-			}
-
-			// Wait for review phase
-			await page1.waitForSelector('button:has-text("card"), button:has-text("Select"), button:has-text("Start next round")', { timeout: 10000 }).catch(() => {});
-
-			// Find asker and complete round
-			if (page1IsAsker) {
-				await revealCard(page1, 0);
-				await page1.waitForSelector('button:has-text("Select")', { timeout: 5000 }).catch(() => {});
-				await selectWinner(page1);
-			} else if (page2IsAsker) {
-				await revealCard(page2, 0);
-				await page2.waitForSelector('button:has-text("Select")', { timeout: 5000 }).catch(() => {});
-				await selectWinner(page2);
-			} else if (page3IsAsker) {
-				await revealCard(page3, 0);
-				await page3.waitForSelector('button:has-text("Select")', { timeout: 5000 }).catch(() => {});
-				await selectWinner(page3);
-			}
-
-			// Check if game ended
-			await page1.waitForTimeout(2000);
-			const gameOverVisible = await page1.locator('text=/Game over/i').isVisible({ timeout: 2000 }).catch(() => false);
-			if (gameOverVisible) {
-				gameEnded = true;
-				break;
-			}
-
-			// Start next round
-			const nextRoundButton = page1.locator('button:has-text("Start next round")');
-			if (await nextRoundButton.isVisible({ timeout: 2000 }).catch(() => false)) {
-				await startNextRound(page1);
-			} else {
-				// Try other pages
-				const nextRoundButton2 = page2.locator('button:has-text("Start next round")');
-				if (await nextRoundButton2.isVisible({ timeout: 2000 }).catch(() => false)) {
-					await startNextRound(page2);
-				} else {
-					const nextRoundButton3 = page3.locator('button:has-text("Start next round")');
-					if (await nextRoundButton3.isVisible({ timeout: 2000 }).catch(() => false)) {
-						await startNextRound(page3);
+				try {
+					await page3.waitForSelector('button:has-text("Submit card")', { timeout: 10000 });
+					await submitCard(page3, 0);
+					await waitForCardSubmission(page3);
+				} catch (e: any) {
+					// If game ended during submission, that's fine
+					if (e.message?.includes('Target page') || e.message?.includes('closed')) {
+						const gameOverCheck = await isGameOver(page3).catch(() => false);
+						if (gameOverCheck) {
+							gameEnded = true;
+							break;
+						}
 					}
 				}
 			}
 
-			// Wait a bit for round transition
-			await page1.waitForTimeout(1000);
+			// Wait for socket events to propagate
+			try {
+				await askerPage.waitForTimeout(1000);
+			} catch (e) {
+				// Page might be closed, continue anyway
+			}
+
+			// Phase 3–5: Review → Reveal → Winner (only asker; see GAME_PHASES.md)
+			await waitForReviewPhase(askerPage);
+			await completeRoundAsAsker(askerPage);
+
+			// Brief wait for winner announcement to propagate before game-over check
+			try {
+				await page1.waitForTimeout(1000);
+			} catch (e) {
+				// Page might be closed, continue anyway
+			}
+
+			// Check if game ended - check ALL pages immediately after winner selection
+			// Use Promise.all to check all pages in parallel
+			const [page1GameOver, page2GameOver, page3GameOver] = await Promise.all([
+				isGameOver(page1).catch(() => false),
+				isGameOver(page2).catch(() => false),
+				isGameOver(page3).catch(() => false)
+			]);
+
+			if (page1GameOver || page2GameOver || page3GameOver) {
+				gameEnded = true;
+				break;
+			}
+
+			// Phase 6: Next round (only asker has "Start next round!"; see GAME_PHASES.md)
+			await startNextRound(askerPage);
+			await waitForNewRound(askerPage);
 		}
 
 		// Verify game ended
@@ -141,6 +166,7 @@ test.describe('Full Game Flow', () => {
 	});
 
 	test('should handle multiple complete rounds', async ({ browser }) => {
+		test.setTimeout(120000); // 3 full rounds need ~90s+ with socket/UI waits
 		// Setup game
 		const context1 = await browser.newContext();
 		const page1 = await context1.newPage();
@@ -161,55 +187,54 @@ test.describe('Full Game Flow', () => {
 		await page2.waitForURL(/\/active-game/, { timeout: 10000 });
 		await page3.waitForURL(/\/active-game/, { timeout: 10000 });
 
-		// Play 3 complete rounds
+		// Play 3 complete rounds (GAME_PHASES.md Phase 2–6)
 		for (let round = 1; round <= 3; round++) {
-			// Wait for question
+			// Phase 2: Submission – wait for question card
 			await waitForQuestionCard(page1);
+			await waitForQuestionCard(page2);
+			await waitForQuestionCard(page3);
 
-			// Submit cards
-			await page2.waitForSelector('button:has-text("Submit card")', { timeout: 10000 }).catch(() => {});
-			await page3.waitForSelector('button:has-text("Submit card")', { timeout: 10000 }).catch(() => {});
+			const page1IsAsker = await isPlayerAsker(page1);
+			const page2IsAsker = await isPlayerAsker(page2);
+			const page3IsAsker = await isPlayerAsker(page3);
+			const askerPage = page1IsAsker ? page1 : page2IsAsker ? page2 : page3;
 
-			// Determine asker
-			const page1IsAsker = await page1.locator('text=/Waiting for players/i').isVisible({ timeout: 2000 }).catch(() => false);
-
+			// Submit cards for ALL non-askers (review phase starts when all submit)
 			if (!page1IsAsker) {
+				await page1.waitForSelector('button:has-text("Submit card")', { timeout: 10000 });
 				await submitCard(page1, 0);
+				await waitForCardSubmission(page1);
 			}
-			await submitCard(page2, 0);
-			await submitCard(page3, 0);
-
-			// Complete round
-			if (page1IsAsker) {
-				await page1.waitForSelector('button:has-text("card")', { timeout: 10000 });
-				await revealCard(page1, 0);
-				await page1.waitForSelector('button:has-text("Select")', { timeout: 5000 });
-				await selectWinner(page1);
-			} else {
-				// Find the asker
-				const page2IsAsker = await page2.locator('text=/Waiting for players/i').isVisible({ timeout: 2000 }).catch(() => false);
-				const askerPage = page2IsAsker ? page2 : page3;
-				await askerPage.waitForSelector('button:has-text("card")', { timeout: 10000 });
-				await revealCard(askerPage, 0);
-				await askerPage.waitForSelector('button:has-text("Select")', { timeout: 5000 });
-				await selectWinner(askerPage);
+			if (!page2IsAsker) {
+				await page2.waitForSelector('button:has-text("Submit card")', { timeout: 10000 });
+				await submitCard(page2, 0);
+				await waitForCardSubmission(page2);
+			}
+			if (!page3IsAsker) {
+				await page3.waitForSelector('button:has-text("Submit card")', { timeout: 10000 });
+				await submitCard(page3, 0);
+				await waitForCardSubmission(page3);
 			}
 
-			// Start next round (if not last round)
+			try {
+				await askerPage.waitForTimeout(1000);
+			} catch (e) {
+				// Page might be closed, continue anyway
+			}
+
+			// Phase 3–5: Review → Reveal → Winner (only asker)
+			await waitForReviewPhase(askerPage);
+			await completeRoundAsAsker(askerPage);
+
+			// Phase 6: Start next round (if not last round; only asker has button)
 			if (round < 3) {
-				await page1.waitForTimeout(2000);
-				const nextRoundButton = page1.locator('button:has-text("Start next round")');
-				if (await nextRoundButton.isVisible({ timeout: 2000 }).catch(() => false)) {
-					await startNextRound(page1);
-				} else {
-					const nextRoundButton2 = page2.locator('button:has-text("Start next round")');
-					if (await nextRoundButton2.isVisible({ timeout: 2000 }).catch(() => false)) {
-						await startNextRound(page2);
-					} else {
-						await startNextRound(page3);
-					}
+				try {
+					await askerPage.waitForTimeout(1000);
+				} catch (e) {
+					// Page might be closed, continue anyway
 				}
-				await page1.waitForTimeout(1000);
+				await startNextRound(askerPage);
+				await waitForNewRound(askerPage);
 			}
 		}
 

@@ -1,0 +1,46 @@
+/* Main section with image and scrolling text - 85vh */
+section[data-section-id='696cd7026506470e3677b8ac'] {
+	min-height: 85vh !important;
+	height: 85vh !important;
+}
+
+section[data-section-id='696cd7026506470e3677b8ac'] .content-wrapper {
+	height: 100%;
+}
+
+/* Footer section - 15vh */
+section[data-section-id='6975dc15c2b7d442632495f1'] {
+	min-height: 15vh !important;
+	height: 15vh !important;
+}
+
+section[data-section-id='6975dc15c2b7d442632495f1'] .content-wrapper {
+	height: 100%;
+	display: flex;
+	align-items: center;
+	justify-content: center;
+}
+
+/* Aligned Automation image container - max-width 250px */
+section[data-section-id='6975dc15c2b7d442632495f1'] .fluid-image-container {
+	max-width: 250px !important;
+	width: 250px !important;
+	height: auto !important;
+}
+
+/* Alternative targeting methods (if needed): */
+/* Using data attribute */
+section[data-section-id='6975dc15c2b7d442632495f1'] [data-sqsp-image-block-image-container] {
+	max-width: 250px !important;
+	width: 250px !important;
+}
+
+/* Target the image inside the container */
+section[data-section-id='6975dc15c2b7d442632495f1']
+	.fluid-image-container
+	img[src*='AA-1C-White-RGB'] {
+	max-width: 100% !important;
+	width: 100% !important;
+	height: auto !important;
+	object-fit: contain !important;
+}

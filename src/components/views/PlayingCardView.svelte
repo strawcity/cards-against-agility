@@ -8,16 +8,26 @@
 	let hasSubmittedCard: boolean;
 	let selectedCard: string = '';
 	let playerId: string;
+	let prevIsInRetro: boolean | undefined = undefined;
 
 	playerStore.subscribe((store) => {
 		const playerStore = store;
 		playerId = playerStore.playerId;
 	});
 
-	$: if ($gameStore.isInRetro === false) {
-		hasSubmittedCard = false;
-		selectedCard = '';
+	$: {
+		const wasInRetro = prevIsInRetro;
+		prevIsInRetro = $gameStore.isInRetro;
+		if (wasInRetro && !$gameStore.isInRetro) {
+			hasSubmittedCard = false;
+			selectedCard = '';
+		}
 	}
+
+	// Server-driven: only show "You've submitted" when receive-answer-card confirmed our submission
+	$: hasServerConfirmedSubmission = $gameStore.submittedCards.some(
+		(sc) => sc.playerId === $playerStore.playerId
+	);
 
 	function selectAnswer(card: string) {
 		selectedCard = card;
@@ -40,7 +50,11 @@
 <QuestionCard answer={selectedCard} />
 
 {#if hasSubmittedCard && !$gameStore.isInRetro}
-	<h3>Waiting for other players</h3>
+	{#if hasServerConfirmedSubmission}
+		<h3>You've submitted. Waiting for other players.</h3>
+	{:else}
+		<h3>Submitting…</h3>
+	{/if}
 {/if}
 {#if !hasSubmittedCard}
 	<!-- When you're chosing your card: -->
